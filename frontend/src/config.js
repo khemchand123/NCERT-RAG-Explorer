@@ -23,7 +23,7 @@ const config = {
         
         // Production environment - use your domain
         if (window.location.hostname === 'aidhunik.com' || window.location.hostname.includes('aidhunik.com')) {
-            return 'https://api.aidhunik.com/ncert';
+            return 'https://api.aidhunik.com/ncert/api';
         }
         
         // Fallback for other domains (staging, etc.)

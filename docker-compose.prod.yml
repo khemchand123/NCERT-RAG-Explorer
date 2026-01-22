@@ -21,7 +21,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: https://api.aidhunik.com/ncert
+        VITE_API_URL: https://api.aidhunik.com/ncert/api
     ports:
       - "3102:3102"
     depends_on:
