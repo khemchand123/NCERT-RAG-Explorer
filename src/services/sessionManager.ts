@@ -13,7 +13,7 @@ interface ChatSession {
 
 export class SessionManager {
     private sessions: Map<string, ChatSession> = new Map();
-    private readonly maxHistoryLength = 5; // Keep last 5 Q&A pairs (10 turns)
+    private readonly maxHistoryLength = 15; // Keep last 5 Q&A pairs (10 turns)
     private readonly sessionTimeout = 30 * 60 * 1000; // 30 minutes
 
     constructor() {

@@ -5,6 +5,7 @@ const API_URL = config.API_URL;
 // Global state
 let currentView = 'dashboard';
 let documentsData = [];
+let chatSessionId = null; // Persist session across turns so Gemini sees full context
 
 // DOM Elements
 const sidebar = document.getElementById('sidebar');
@@ -79,7 +80,7 @@ function handleRouting() {
     
     if (path === '/demo') {
         // Redirect to YouTube video
-        window.location.href = 'https://www.youtube.com/watch?v=Yd9n_Rci6C0&t=21s';
+        window.location.href = 'https://youtu.be/pbvh3fM1im8';
         return;
     }
 }
@@ -388,12 +389,18 @@ async function handleChatSend() {
         const response = await fetch(`${API_URL}/search`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: message })
+            body: JSON.stringify({
+                query: message,
+                sessionId: chatSessionId || undefined
+            })
         });
         
         const data = await response.json();
         
         if (response.ok) {
+            if (data.sessionId) {
+                chatSessionId = data.sessionId;
+            }
             // Add bot response to chat
             addMessageToChat(data.text, 'bot', data.groundingMetadata?.groundingChunks);
         } else {
