@@ -44,4 +44,9 @@ router.get('/documents', ragController.listDocuments);
 router.delete('/documents/:documentId', ragController.deleteDocument);
 router.get('/store-info', ragController.getStoreInfo);
 
+// Session management routes
+router.get('/sessions/:sessionId/history', ragController.getConversationHistory);
+router.delete('/sessions/:sessionId', ragController.clearSession);
+router.get('/sessions/stats', ragController.getSessionStats);
+
 export default router;

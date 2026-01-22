@@ -60,12 +60,15 @@ export const indexDocument = async (req: Request, res: Response) => {
 
 export const search = async (req: Request, res: Response) => {
     try {
-        const { query, filter } = req.body;
+        const { query, filter, sessionId } = req.body;
         if (!query) {
             return res.status(400).json({ error: 'Query is required' });
         }
 
-        const result = await geminiService.query(query, filter);
+        // Generate sessionId if not provided
+        const finalSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const result = await geminiService.query(query, filter, finalSessionId);
         res.json(result);
     } catch (error: any) {
         console.error('Error searching:', error);
@@ -109,6 +112,48 @@ export const getStoreInfo = async (req: Request, res: Response) => {
         res.json(storeInfo);
     } catch (error: any) {
         console.error('Error getting store info:', error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+};
+
+export const getConversationHistory = async (req: Request, res: Response) => {
+    try {
+        const sessionId = req.params.sessionId as string;
+        
+        if (!sessionId) {
+            return res.status(400).json({ error: 'Session ID is required' });
+        }
+        
+        const history = geminiService.getConversationHistory(sessionId);
+        res.json({ sessionId, history, total: history.length });
+    } catch (error: any) {
+        console.error('Error getting conversation history:', error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+};
+
+export const clearSession = async (req: Request, res: Response) => {
+    try {
+        const sessionId = req.params.sessionId as string;
+        
+        if (!sessionId) {
+            return res.status(400).json({ error: 'Session ID is required' });
+        }
+        
+        geminiService.clearSession(sessionId);
+        res.json({ message: 'Session cleared successfully', sessionId });
+    } catch (error: any) {
+        console.error('Error clearing session:', error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+};
+
+export const getSessionStats = async (req: Request, res: Response) => {
+    try {
+        const stats = geminiService.getSessionStats();
+        res.json(stats);
+    } catch (error: any) {
+        console.error('Error getting session stats:', error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 };

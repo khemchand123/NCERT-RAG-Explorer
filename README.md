@@ -130,9 +130,21 @@ curl -X POST http://localhost:3101/api/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What is photosynthesis and how does it work?",
-    "filter": "book=\"science\""
+    "filter": "book=\"science\"",
+    "sessionId": "my-session-123"
   }'
 ```
+
+**Response:**
+```json
+{
+  "text": "Photosynthesis is the process by which green plants...",
+  "groundingMetadata": {...},
+  "sessionId": "my-session-123"
+}
+```
+
+**Note:** The `sessionId` parameter is optional. If provided, the system will maintain conversation context for the last 5 Q&A pairs. If not provided, a new session ID will be generated automatically.
 
 ### 3. List Chapters
 Get all indexed chapters with metadata and statistics.
@@ -195,6 +207,66 @@ Get information about the Gemini store.
 **Curl Request:**
 ```bash
 curl -X GET http://localhost:3101/api/store-info
+```
+
+### 6. Session Management
+
+#### Get Conversation History
+Retrieve the conversation history for a specific session.
+
+**Endpoint:** `GET /api/sessions/{sessionId}/history`
+
+**Curl Request:**
+```bash
+curl -X GET http://localhost:3101/api/sessions/my-session-123/history
+```
+
+**Response:**
+```json
+{
+  "sessionId": "my-session-123",
+  "history": [
+    {
+      "role": "user",
+      "content": "What is photosynthesis?",
+      "timestamp": "2024-01-22T10:30:00.000Z"
+    },
+    {
+      "role": "model", 
+      "content": "Photosynthesis is the process...",
+      "timestamp": "2024-01-22T10:30:01.000Z"
+    }
+  ],
+  "total": 2
+}
+```
+
+#### Clear Session
+Clear the conversation history for a specific session.
+
+**Endpoint:** `DELETE /api/sessions/{sessionId}`
+
+**Curl Request:**
+```bash
+curl -X DELETE http://localhost:3101/api/sessions/my-session-123
+```
+
+#### Get Session Statistics
+Get statistics about active sessions.
+
+**Endpoint:** `GET /api/sessions/stats`
+
+**Curl Request:**
+```bash
+curl -X GET http://localhost:3101/api/sessions/stats
+```
+
+**Response:**
+```json
+{
+  "totalSessions": 15,
+  "activeSessions": 8
+}
 ```
 
 ### 6. Health Check

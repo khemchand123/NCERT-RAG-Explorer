@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { config } from '../config/env';
+import { SessionManager } from './sessionManager';
 import fs from 'fs';
 import path from 'path';
 
@@ -75,9 +76,11 @@ console.log(`Loaded ${documentsStore.length} documents from persistent storage`)
 
 export class GeminiService {
     private client: GoogleGenAI;
+    private sessionManager: SessionManager;
 
     constructor() {
         this.client = new GoogleGenAI({ apiKey: config.geminiApiKey });
+        this.sessionManager = new SessionManager();
     }
 
     async getOrCreateStore(displayName: string) {
@@ -178,7 +181,7 @@ export class GeminiService {
         return operation;
     }
 
-    async query(prompt: string, metadataFilter?: string) {
+    async query(prompt: string, metadataFilter?: string, sessionId?: string) {
         const store = await this.getOrCreateStore(config.storeName);
 
         if (!store.name) {
@@ -187,10 +190,24 @@ export class GeminiService {
 
         console.log(`Querying store ${store.name} with prompt: "${prompt}" and filter: "${metadataFilter}"`);
 
+        // Build conversation contents array
+        const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+        // Add conversation history if sessionId is provided
+        if (sessionId) {
+            const history = this.sessionManager.formatHistoryForGemini(sessionId);
+            contents.push(...history);
+        }
+
+        // Add current user query
+        contents.push({
+            role: 'user',
+            parts: [{ text: prompt }]
+        });
+
         const response = await this.client.models.generateContent({
             model: config.geminiModel,
-            contents: prompt,
-
+            contents: contents,
             config: {
                 systemInstruction: systemInstruction,
                 tools: [{
@@ -202,9 +219,17 @@ export class GeminiService {
             }
         });
 
+        const responseText = response.text;
+
+        // Store the conversation in session history if sessionId is provided
+        if (sessionId && responseText) {
+            this.sessionManager.addToHistory(sessionId, prompt, responseText);
+        }
+
         return {
-            text: response.text,
-            groundingMetadata: response.candidates?.[0]?.groundingMetadata
+            text: responseText,
+            groundingMetadata: response.candidates?.[0]?.groundingMetadata,
+            sessionId: sessionId
         };
     }
 
@@ -404,5 +429,18 @@ export class GeminiService {
                 documentsCount: documentsStore.length
             };
         }
+    }
+
+    // Session management methods
+    getConversationHistory(sessionId: string) {
+        return this.sessionManager.getConversationHistory(sessionId);
+    }
+
+    clearSession(sessionId: string) {
+        this.sessionManager.clearSession(sessionId);
+    }
+
+    getSessionStats() {
+        return this.sessionManager.getSessionStats();
     }
 }

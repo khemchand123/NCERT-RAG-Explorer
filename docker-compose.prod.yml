@@ -18,7 +18,10 @@ services:
       start_period: 40s
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: https://api.aidhunik.com/ncert
     ports:
       - "3102:3102"
     depends_on:
@@ -26,7 +29,6 @@ services:
         condition: service_healthy
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=https://api.aidhunik.com/ncrt
 
 volumes:
   uploads_data:
