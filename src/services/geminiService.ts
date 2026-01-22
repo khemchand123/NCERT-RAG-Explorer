@@ -3,6 +3,41 @@ import { config } from '../config/env';
 import fs from 'fs';
 import path from 'path';
 
+// File-based storage for persistence (in production, use a database)
+const DOCUMENTS_FILE = path.join(__dirname, '../data/documents.json');
+
+// Ensure data directory exists
+const dataDir = path.dirname(DOCUMENTS_FILE);
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Load documents from file
+function loadDocuments(): any[] {
+    try {
+        if (fs.existsSync(DOCUMENTS_FILE)) {
+            const data = fs.readFileSync(DOCUMENTS_FILE, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('Error loading documents:', error);
+    }
+    return [];
+}
+
+// Save documents to file
+function saveDocuments(documents: any[]): void {
+    try {
+        fs.writeFileSync(DOCUMENTS_FILE, JSON.stringify(documents, null, 2));
+    } catch (error) {
+        console.error('Error saving documents:', error);
+    }
+}
+
+// Initialize documents from file
+let documentsStore: any[] = loadDocuments();
+console.log(`Loaded ${documentsStore.length} documents from persistent storage`);
+
 export class GeminiService {
     private client: GoogleGenAI;
 
@@ -48,10 +83,6 @@ export class GeminiService {
             config: { displayName: displayName }
         });
 
-        // The create operation returns the store directly or an operation? 
-        // Based on the article: "const createStoreOp = await ai.fileSearchStores.create(...) -> console.log(createStoreOp.name)"
-        // It seems it returns the store object directly or a long running op that resolves to it.
-        // Let's assume it returns the store object as per the article snippet.
         return createStoreOp;
     }
 
@@ -89,6 +120,25 @@ export class GeminiService {
         }
 
         console.log(`Processed: ${fileName}`);
+
+        // Store document info for listing (persistent storage)
+        const documentInfo = {
+            name: `files/${Date.now()}-${fileName}`,
+            displayName: fileName,
+            mimeType: mimeType,
+            sizeBytes: fs.statSync(filePath).size,
+            createTime: new Date().toISOString(),
+            updateTime: new Date().toISOString(),
+            metadata: customMetadata,
+            state: 'ACTIVE',
+            geminiDocumentName: operation.response?.documentName || '',
+            geminiStoreName: store.name
+        };
+
+        documentsStore.push(documentInfo);
+        saveDocuments(documentsStore);
+        console.log(`Saved document to persistent storage. Total documents: ${documentsStore.length}`);
+
         return operation;
     }
 
@@ -118,5 +168,49 @@ export class GeminiService {
             text: response.text,
             groundingMetadata: response.candidates?.[0]?.groundingMetadata
         };
+    }
+
+    async listDocuments() {
+        console.log(`Listing ${documentsStore.length} documents from persistent store`);
+
+        // Return documents from our persistent store
+        return [...documentsStore].reverse(); // Most recent first
+    }
+
+    async deleteDocument(documentId: string) {
+        console.log(`Deleting document with ID: ${documentId}`);
+
+        // Find document in store
+        const index = documentsStore.findIndex(doc => doc.name === documentId);
+
+        if (index === -1) {
+            throw new Error('Document not found');
+        }
+
+        // Remove from store
+        const deletedDoc = documentsStore.splice(index, 1)[0];
+        saveDocuments(documentsStore);
+        console.log(`Saved updated documents to persistent storage. Total documents: ${documentsStore.length}`);
+
+        // In production, you would also delete from Gemini File Search Store
+        // For now, we just remove from our local tracking
+
+        console.log(`Deleted document: ${deletedDoc.displayName}`);
+        return { message: 'Document deleted successfully', document: deletedDoc };
+    }
+
+    // Method to get store info
+    async getStoreInfo() {
+        try {
+            const store = await this.getOrCreateStore(config.storeName);
+            return {
+                storeName: store.name,
+                displayName: store.displayName,
+                documentsCount: documentsStore.length
+            };
+        } catch (error) {
+            console.error('Error getting store info:', error);
+            return null;
+        }
     }
 }

@@ -1,6 +1,0 @@
-Gemini API File Search is a powerful RAG system provided by Google.
-It allows developers to upload documents and perform semantic search without managing a vector database.
-The pricing model is interesting: storage is free, and query-time embeddings are free.
-You only pay for the initial indexing.
-This makes it a cost-effective solution for building RAG applications.
-The API handles chunking, embedding, and retrieval automatically.

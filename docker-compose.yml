@@ -2,15 +2,31 @@ services:
   backend:
     build: .
     ports:
-      - "3000:3000"
+      - "3001:3001"
     env_file:
       - .env
     volumes:
-      - ./src/uploads:/app/src/uploads
+      - uploads_data:/app/src/uploads
+      - documents_data:/app/src/data
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
     build: ./frontend
     ports:
-      - "8080:8080"
+      - "3002:3002"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  uploads_data:
+  documents_data:

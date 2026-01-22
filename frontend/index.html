@@ -4,63 +4,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini File Search RAG</title>
+    <title>NCERT RAG Explorer - Education Hackathon</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./src/style.css">
 </head>
 
 <body>
     <div id="app">
-        <header>
-            <h1 class="gradient-text">Gemini RAG Explorer</h1>
-            <p>Upload documents and search with Google's File Search API</p>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>NCERT RAG Explorer</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="global-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Search across all chapters...">
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="stats-badge">
+                    <span id="total-docs">0</span> Chapters
+                </div>
+            </div>
         </header>
 
-        <main>
-            <section class="upload-section glass">
-                <h2>Index Documents</h2>
-                <div class="upload-container">
-                    <label for="file-upload" class="custom-file-upload">
-                        <span id="file-name">Choose a file...</span>
-                    </label>
-                    <input id="file-upload" type="file" />
-                    <input type="text" id="metadata-input" placeholder='Metadata (e.g. {"type":"manual"})' />
-                    <button id="index-btn" class="primary-btn">Index Document</button>
-                </div>
-                <div id="upload-status" class="status-msg"></div>
-            </section>
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-view="upload">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload Chapter</span>
+                </a>
+                <a href="#" class="nav-item" data-view="chapters">
+                    <i class="fas fa-book"></i>
+                    <span>My Chapters</span>
+                </a>
+                <a href="#" class="nav-item" data-view="search">
+                    <i class="fas fa-comments"></i>
+                    <span>AI Chat</span>
+                </a>
+            </nav>
+        </aside>
 
-            <section class="search-section glass">
-                <h2>Semantic Search</h2>
-                <div class="search-container">
-                    <div class="search-inputs">
-                        <input type="text" id="search-input" placeholder="Ask anything about your documents..." />
-                        <input type="text" id="filter-input" placeholder='Filter (e.g. type="manual")' />
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <div class="hero-section">
+                    <h1 class="gradient-text">Welcome to NCERT RAG Explorer</h1>
+                    <p>Upload NCERT chapters and get instant AI-powered answers</p>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="dashboard-total-docs">0</h3>
+                                <p>Total Chapters</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="recent-uploads">0</h3>
+                                <p>Recent Uploads</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>AI-Powered</h3>
+                                <p>Smart Search</p>
+                            </div>
+                        </div>
                     </div>
-                    <button id="search-btn" class="primary-btn">Search</button>
                 </div>
-                <div id="search-results" class="results-container">
-                    <div id="loading-spinner" class="hidden">
-                        <div class="spinner"></div>
-                        <p>Searching your knowledge base...</p>
-                    </div>
-                    <div id="answer-box" class="hidden">
-                        <h3>Answer</h3>
-                        <div id="answer-content"></div>
-                        <div id="citations" class="citations-container"></div>
+
+                <div class="recent-section">
+                    <h2>Recent Uploads</h2>
+                    <div id="recent-uploads-grid" class="chapters-grid">
+                        <!-- Recent uploads will be populated here -->
                     </div>
                 </div>
-            </section>
+            </div>
+
+            <!-- Upload View -->
+            <div id="upload-view" class="view">
+                <div class="upload-section glass">
+                    <h2><i class="fas fa-upload"></i> Upload NCERT Chapter</h2>
+                    
+                    <div class="upload-container">
+                        <div class="drop-zone" id="drop-zone">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Drop NCERT PDF here</h3>
+                                <p>or <span class="browse-link">click to browse</span></p>
+                                <input type="file" id="file-upload" accept=".pdf" hidden>
+                            </div>
+                            <div class="file-preview" id="file-preview" style="display: none;">
+                                <i class="fas fa-file-pdf"></i>
+                                <span id="file-name"></span>
+                                <button id="remove-file" class="remove-btn">×</button>
+                            </div>
+                        </div>
+
+                        <div class="upload-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Book/Subject</label>
+                                    <select id="book-select">
+                                        <option value="">Select Book</option>
+                                        <option value="mathematics">Mathematics</option>
+                                        <option value="science">Science</option>
+                                        <option value="social-science">Social Science</option>
+                                        <option value="english">English</option>
+                                        <option value="hindi">Hindi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Class</label>
+                                    <select id="class-select">
+                                        <option value="">Select Class</option>
+                                        <option value="6">Class 6</option>
+                                        <option value="7">Class 7</option>
+                                        <option value="8">Class 8</option>
+                                        <option value="9">Class 9</option>
+                                        <option value="10">Class 10</option>
+                                        <option value="11">Class 11</option>
+                                        <option value="12">Class 12</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Chapter Name</label>
+                                <input type="text" id="chapter-input" placeholder="e.g., Light - Reflection and Refraction">
+                            </div>
+                            <button id="upload-btn" class="primary-btn" disabled>
+                                <i class="fas fa-upload"></i>
+                                Upload Chapter
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="upload-progress" class="progress-container" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <p id="progress-text">Uploading and indexing...</p>
+                    </div>
+
+                    <div id="upload-status" class="status-msg"></div>
+                </div>
+            </div>
+
+            <!-- Chapters List View -->
+            <div id="chapters-view" class="view">
+                <div class="chapters-header">
+                    <h2><i class="fas fa-book"></i> My Chapters</h2>
+                    <div class="filters">
+                        <span class="filter-label">Filter by:</span>
+                        <select id="filter-book">
+                            <option value="">All Books</option>
+                            <option value="mathematics">Mathematics</option>
+                            <option value="science">Science</option>
+                            <option value="social-science">Social Science</option>
+                            <option value="english">English</option>
+                            <option value="hindi">Hindi</option>
+                        </select>
+                        <select id="filter-class">
+                            <option value="">All Classes</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                        </select>
+                        <button id="refresh-chapters" class="refresh-btn">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chapters-loading" class="loading-state" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading chapters...</p>
+                </div>
+
+                <div id="chapters-grid" class="chapters-grid">
+                    <!-- Chapters will be populated here -->
+                </div>
+
+                <div id="no-chapters" class="empty-state" style="display: none;">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No chapters found</h3>
+                    <p>Upload your first NCERT chapter to get started</p>
+                    <button class="primary-btn" onclick="switchView('upload')">
+                        <i class="fas fa-upload"></i>
+                        Upload Chapter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search View -->
+            <div id="search-view" class="view">
+                <div class="search-section glass">
+                    <h2><i class="fas fa-comments"></i> Chat with Your Chapters</h2>
+                    
+                    <!-- Chat Messages Container -->
+                    <div id="chat-container" class="chat-container">
+                        <div id="chat-messages" class="chat-messages">
+                            <div class="welcome-message">
+                                <div class="bot-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p>👋 Hello! I'm your AI assistant. Ask me anything about your uploaded NCERT chapters!</p>
+                                    <div class="suggestions-quick">
+                                        <span class="quick-suggestion" onclick="sendQuickMessage('What topics are covered in my chapters?')">📚 What topics are covered?</span>
+                                        <span class="quick-suggestion" onclick="sendQuickMessage('Explain photosynthesis')">🌱 Explain photosynthesis</span>
+                                        <span class="quick-suggestion" onclick="sendQuickMessage('What is Newton\'s first law?')">⚖️ Newton's laws</span>
+                                        <span class="quick-suggestion" onclick="sendQuickMessage('Tell me about democracy')">🏛️ About democracy</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Typing Indicator -->
+                        <div id="typing-indicator" class="typing-indicator hidden">
+                            <div class="bot-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Input -->
+                    <div class="chat-input-container">
+                        <div class="chat-input-wrapper">
+                            <input type="text" id="chat-input" placeholder="Ask me anything about your chapters..." maxlength="500">
+                            <button id="send-btn" class="send-btn" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="input-footer">
+                            <span class="char-count"><span id="char-count">0</span>/500</span>
+                            <span class="powered-by">Powered by Gemini AI</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
-
-        <footer>
-            <p>Powered by Gemini 2.0 & File Search API</p>
-        </footer>
     </div>
+
+    <!-- Chapter Details Modal -->
+    <div id="chapter-modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modal-title">Chapter Details</h2>
+                <button id="modal-close" class="modal-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="chapter-detail-grid">
+                    <div class="detail-section">
+                        <div class="detail-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="detail-info">
+                            <h3 id="detail-chapter-name">Chapter Name</h3>
+                            <p id="detail-file-name">File Name</p>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Book/Subject</div>
+                            <div class="stat-value" id="detail-book">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Class</div>
+                            <div class="stat-value" id="detail-class">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">File Size</div>
+                            <div class="stat-value" id="detail-size">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Upload Date</div>
+                            <div class="stat-value" id="detail-upload-date">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">File Type</div>
+                            <div class="stat-value" id="detail-mime-type">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Status</div>
+                            <div class="stat-value" id="detail-status">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-metadata">
+                        <h4>Additional Information</h4>
+                        <div id="detail-metadata-content">
+                            <div class="metadata-item">
+                                <span class="metadata-label">Document ID:</span>
+                                <span class="metadata-value" id="detail-document-id">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Estimated Pages:</span>
+                                <span class="metadata-value" id="detail-pages">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Indexing Status:</span>
+                                <span class="metadata-value" id="detail-indexing-status">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn secondary" onclick="closeChapterModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button class="action-btn" onclick="chatWithChapterFromModal()">
+                    <i class="fas fa-comments"></i> Chat with Chapter
+                </button>
+                <button class="action-btn danger" onclick="deleteChapterFromModal()">
+                    <i class="fas fa-trash"></i> Delete Chapter
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="./src/main.js"></script>
 </body>
 
