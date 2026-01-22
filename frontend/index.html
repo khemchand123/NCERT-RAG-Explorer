@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini File Search RAG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1 class="gradient-text">Gemini RAG Explorer</h1>
+            <p>Upload documents and search with Google's File Search API</p>
+        </header>
+
+        <main>
+            <section class="upload-section glass">
+                <h2>Index Documents</h2>
+                <div class="upload-container">
+                    <label for="file-upload" class="custom-file-upload">
+                        <span id="file-name">Choose a file...</span>
+                    </label>
+                    <input id="file-upload" type="file" />
+                    <input type="text" id="metadata-input" placeholder='Metadata (e.g. {"type":"manual"})' />
+                    <button id="index-btn" class="primary-btn">Index Document</button>
+                </div>
+                <div id="upload-status" class="status-msg"></div>
+            </section>
+
+            <section class="search-section glass">
+                <h2>Semantic Search</h2>
+                <div class="search-container">
+                    <div class="search-inputs">
+                        <input type="text" id="search-input" placeholder="Ask anything about your documents..." />
+                        <input type="text" id="filter-input" placeholder='Filter (e.g. type="manual")' />
+                    </div>
+                    <button id="search-btn" class="primary-btn">Search</button>
+                </div>
+                <div id="search-results" class="results-container">
+                    <div id="loading-spinner" class="hidden">
+                        <div class="spinner"></div>
+                        <p>Searching your knowledge base...</p>
+                    </div>
+                    <div id="answer-box" class="hidden">
+                        <h3>Answer</h3>
+                        <div id="answer-content"></div>
+                        <div id="citations" class="citations-container"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Powered by Gemini 2.0 & File Search API</p>
+        </footer>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
