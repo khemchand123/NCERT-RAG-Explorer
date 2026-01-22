@@ -65,10 +65,24 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadBtn: !!uploadBtn
     });
     
+    // Handle demo route
+    handleRouting();
+    
     initializeApp();
     setupEventListeners();
     loadDocuments();
 });
+
+// Handle routing for demo endpoint
+function handleRouting() {
+    const path = window.location.pathname;
+    
+    if (path === '/demo') {
+        // Redirect to YouTube video
+        window.location.href = 'https://www.youtube.com/watch?v=Yd9n_Rci6C0&t=21s';
+        return;
+    }
+}
 
 function initializeApp() {
     // Set initial view

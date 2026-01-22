@@ -1,0 +1,13 @@
+{
+  "public": "dist",
+  "rewrites": [
+    {
+      "source": "/demo",
+      "destination": "/index.html"
+    },
+    {
+      "source": "**",
+      "destination": "/index.html"
+    }
+  ]
+}

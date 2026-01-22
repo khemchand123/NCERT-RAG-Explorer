@@ -30,6 +30,7 @@ RUN npm install -g serve
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/serve.json ./serve.json
 
 # Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -43,5 +44,5 @@ EXPOSE 3102
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3102/ || exit 1
 
-# Start the server with SPA support (-s)
-CMD ["serve", "-s", "dist", "-l", "3102"]
+# Start the server with SPA support and custom config
+CMD ["serve", "-c", "serve.json", "-l", "3102"]
