@@ -9,7 +9,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 export const config = {
     geminiApiKey: process.env.GEMINI_API_KEY,
-    port: process.env.PORT || 3001,
+    port: process.env.PORT || 3101,
     storeName: process.env.STORE_NAME || 'ncert-rag-store-fixed',
     geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 };

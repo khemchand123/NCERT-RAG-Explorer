@@ -85,8 +85,8 @@ docker-compose up --build
 ```
 
 **Access Points:**
-- **Frontend**: `http://localhost:3002`
-- **Backend API**: `http://localhost:3001`
+- **Frontend**: `http://localhost:3102`
+- **Backend API**: `http://localhost:3101`
 
 #### Docker Commands
 ```bash
@@ -113,7 +113,7 @@ Upload and index an NCERT chapter with metadata.
 
 **Curl Request:**
 ```bash
-curl -X POST http://localhost:3001/api/index \
+curl -X POST http://localhost:3101/api/index \
   -F "file=@/path/to/NCERT_Class10_Science_Chapter_1.pdf" \
   -F 'metadata={"book": "science", "class": "10", "chapter": "Light - Reflection and Refraction"}'
 ```
@@ -126,7 +126,7 @@ Perform semantic search across indexed chapters with optional filtering.
 
 **Curl Request:**
 ```bash
-curl -X POST http://localhost:3001/api/search \
+curl -X POST http://localhost:3101/api/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What is photosynthesis and how does it work?",
@@ -141,7 +141,7 @@ Get all indexed chapters with metadata and statistics.
 
 **Curl Request:**
 ```bash
-curl -X GET http://localhost:3001/api/documents
+curl -X GET http://localhost:3101/api/documents
 ```
 
 **Response:**
@@ -173,7 +173,7 @@ Delete a specific indexed chapter.
 
 **Curl Request:**
 ```bash
-curl -X DELETE http://localhost:3001/api/documents/files%2F1234567890-chapter1.pdf
+curl -X DELETE http://localhost:3101/api/documents/files%2F1234567890-chapter1.pdf
 ```
 
 **Response:**
@@ -194,7 +194,7 @@ Get information about the Gemini store.
 
 **Curl Request:**
 ```bash
-curl -X GET http://localhost:3001/api/store-info
+curl -X GET http://localhost:3101/api/store-info
 ```
 
 ### 6. Health Check
@@ -204,7 +204,7 @@ Check if the backend service is running.
 
 **Curl Request:**
 ```bash
-curl -X GET http://localhost:3001/health
+curl -X GET http://localhost:3101/health
 ```
 
 ## 🏗️ Project Structure
@@ -290,8 +290,8 @@ This solution directly addresses the **Innovation for Education Equity** theme b
 - `GEMINI_MODEL`: Gemini model to use (default: gemini-2.5-flash)
 
 ### Port Configuration
-- **Backend**: Port 3001
-- **Frontend**: Port 3002 (Docker), Port 5173 (Development)
+- **Backend**: Port 3101
+- **Frontend**: Port 3102 (Docker), Port 5173 (Development)
 
 ## 🧪 Testing
 
@@ -306,13 +306,13 @@ This solution directly addresses the **Innovation for Education Equity** theme b
 ### API Testing
 ```bash
 # Test health check
-curl http://localhost:3001/health
+curl http://localhost:3101/health
 
 # Test document listing
-curl http://localhost:3001/api/documents
+curl http://localhost:3101/api/documents
 
 # Test store information
-curl http://localhost:3001/api/store-info
+curl http://localhost:3101/api/store-info
 ```
 
 ## 📄 License

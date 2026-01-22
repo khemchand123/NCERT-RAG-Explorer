@@ -549,23 +549,14 @@ function createChapterCard(chapter) {
             <div class="chapter-icon">
                 <i class="fas fa-file-pdf"></i>
             </div>
-            <div class="chapter-title">${metadata.chapter || chapter.displayName}</div>
-            <div class="chapter-menu">
-                <button class="menu-btn" onclick="toggleChapterMenu('${chapter.name}')">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-                <div class="chapter-menu-dropdown" id="menu-${chapter.name}" style="display: none;">
-                    <button class="menu-item" onclick="chatWithChapter('${metadata.chapter || chapter.displayName}')">
-                        <i class="fas fa-comments"></i> Chat
-                    </button>
-                    <button class="menu-item" onclick="viewChapterDetails('${chapter.name}')">
-                        <i class="fas fa-info-circle"></i> Details
-                    </button>
-                    <button class="menu-item delete-item" onclick="deleteChapter('${chapter.name}', '${metadata.chapter || chapter.displayName}')">
-                        <i class="fas fa-trash-alt"></i> Delete Chapter
-                    </button>
+            <div class="chapter-title-container">
+                <div class="chapter-title" title="${metadata.chapter || chapter.displayName}">
+                    ${metadata.chapter || chapter.displayName}
                 </div>
             </div>
+            <button class="delete-btn-corner" onclick="deleteChapter('${chapter.name}', '${metadata.chapter || chapter.displayName}')" title="Delete Chapter">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         
         <div class="chapter-meta">

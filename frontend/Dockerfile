@@ -33,11 +33,11 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
-EXPOSE 3002
+EXPOSE 3102
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3002/ || exit 1
+  CMD curl -f http://localhost:3102/ || exit 1
 
 # Start the server with SPA support (-s)
-CMD ["serve", "-s", "dist", "-l", "3002"]
+CMD ["serve", "-s", "dist", "-l", "3102"]
