@@ -26,7 +26,7 @@ services:
         condition: service_healthy
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=http://localhost:3101/api
+      - VITE_API_URL=https://api.aidhunik.com/ncrt
 
 volumes:
   uploads_data:

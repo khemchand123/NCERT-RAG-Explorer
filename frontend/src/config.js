@@ -2,16 +2,32 @@
 const config = {
     // Determine API URL based on environment
     API_URL: (() => {
-        // If running in Docker (backend service name resolves)
-        if (window.location.hostname === 'localhost' && window.location.port === '3102') {
+        // Check for environment variable (for build-time configuration)
+        if (import.meta.env.VITE_API_URL) {
+            return import.meta.env.VITE_API_URL;
+        }
+        
+        // Development environments (localhost)
+        if (window.location.hostname === 'localhost') {
+            // Docker environment (frontend on 3102)
+            if (window.location.port === '3102') {
+                return 'http://localhost:3101/api';
+            }
+            // Vite dev server (frontend on 5173)
+            if (window.location.port === '5173') {
+                return 'http://localhost:3101/api';
+            }
+            // Any other localhost port
             return 'http://localhost:3101/api';
         }
-        // If running in development
-        if (window.location.hostname === 'localhost' && window.location.port === '5173') {
-            return 'http://localhost:3101/api';
+        
+        // Production environment - use your domain
+        if (window.location.hostname === 'aidhunik.com' || window.location.hostname.includes('aidhunik.com')) {
+            return 'https://api.aidhunik.com/ncrt';
         }
-        // Production or Docker environment
-        return `${window.location.protocol}//${window.location.hostname}:3101/api`;
+        
+        // Fallback for other domains (staging, etc.)
+        return `${window.location.protocol}//${window.location.hostname}/api`;
     })()
 };
 
