@@ -106,14 +106,14 @@
     "medicine_searched": "<corrected/standardized medicine name>",
     "total_results": "<number>",
     "current_status": "<banned | approved | scheduled | controlled | open | unknown>",
-    "results": [
+    "results":
       {
         "gazette_id": "<GSR number exactly as found in documents, or 'N/A'>",
         "pdf_name": "<exact source document name from metadata, or 'source not identified'>",
         "medicine_name": "<full medicine name or FDC exactly as in document>",
         "date_of_ban": "<DD MMM YYYY exactly as found in documents, or 'N/A'>",
         "date_of_uplift": "<DD MMM YYYY exactly as found in documents, or 'N/A'>",
-        "details": "<paragraph from documents about regulatory status. Quote directly where possible. Prefix general knowledge with '[Based on general knowledge]'>",
+        "summary": "Just output the summary that you built in point 22 above. Do not output anything else. Do not say 'As an AI language model' or 'Based on the provided documents'. Just give the summary as asked. This is a single 1-2 line summary, nothing else and ONLY THIS SHOULD BE OUTPUT.",
         "reasons_for_ban": "<reasons exactly as stated in documents, or 'N/A'>",
         "reasons_for_uplift": "<reasons exactly as stated in documents, or 'N/A'>",
         "drug_category": "<single_drug | fdc | import_banned>",
@@ -125,9 +125,6 @@
         "alternative_medicines": "<alternatives from documents, or 'Not specified in documents'>",
         "compliance_note": "<penalties, transition periods from documents>"
       }
-    ],
-    "summary": "<2-3 line human-readable summary. Clearly indicate if info is from documents or general knowledge.>",
-    "disclaimer": "This information is based on regulatory documents available in the system. For latest status, verify with cdsco.gov.in or egazette.gov.in."
   }
   ```
 
