@@ -1,38 +1,58 @@
-# NCERT RAG Explorer - Education Hackathon Solution
+# 🏥 Banned Pharma RAG Explorer — Government of India Pharmaceutical Regulatory Compliance API
 
-A production-ready RAG (Retrieval-Augmented Generation) system built with Google's Gemini API File Search, specifically designed for NCERT chapter management and AI-powered educational assistance.
+A production-ready RAG (Retrieval-Augmented Generation) system built with **Google Gemini API File Search**, designed to help users check whether a medicine is **banned, restricted, or approved** in India based on official CDSCO regulatory documents.
 
-## 🎯 Hackathon Theme: Innovation for Education Equity
+---
 
-This solution addresses the need for accessible, AI-powered educational tools that can help students and teachers interact with NCERT content more effectively. Built for the **Innovation for Education Equity Hackathon** as part of the Shikshagraha movement.
+## 🎯 What This Does
+
+Upload official pharmaceutical regulatory documents (CDSCO banned drug lists, Indian Gazette notifications, state drugs department circulars, etc.) and then **search by medicine name** to get a structured JSON response with:
+
+- ✅ **Ban status** — Is the medicine banned, approved, scheduled, controlled, or unknown?
+- 📋 **Gazette references** — GSR numbers, notification dates, issuing authorities
+- 💊 **Drug category** — Single drug, FDC (Fixed Dose Combination), or import-banned
+- 📅 **Ban/Uplift dates** — When was it banned? Was the ban lifted?
+- 📝 **Detailed reasons** — Why it was banned, under which act/section
+- 🔄 **Alternative medicines** — Recommendations from the documents
+- 📑 **Source attribution** — Which PDF file the information came from
+
+---
+
+## 📂 Sample Data
+
+The `data/` folder contains sample banned drug PDF documents that can be uploaded to the system:
+
+| File | Description |
+|------|-------------|
+| `banned-drugs-cdsco-1940.pdf` | CDSCO banned drugs list under the Drugs and Cosmetics Act, 1940 |
+| `cdsco_banned_01Jan2018.pdf` | CDSCO consolidated banned drugs list (January 2018) |
+| `delhi.pdf` | Delhi State Drugs Department banned drugs circular |
+
+---
 
 ## ✨ Features
 
-### 🎓 Education-Focused
-- **NCERT Chapter Management**: Upload and organize chapters by book, class, and subject
-- **Smart Metadata**: Automatic categorization with book, class, and chapter information
-- **Educational UI**: Dashboard designed specifically for educational content
-- **Persistent Storage**: Documents survive server restarts with file-based persistence
+### 🔍 Pharmaceutical Regulatory Search
+- **Medicine Lookup**: Search any medicine name to check if it's banned in India
+- **Fuzzy Matching**: Handles typos and spelling variations (e.g., "paracemotol" → "paracetamol")
+- **FDC Awareness**: Distinguishes between individual drug bans and FDC (combination) bans
+- **Chronological Analysis**: Checks for ban uplift notifications — the latest notification takes precedence
+- **Multi-document Search**: Cross-references across all uploaded regulatory documents
 
-### 🤖 AI-Powered Search
-- **Semantic Search**: Ask questions in natural language about any uploaded chapter
-- **Contextual Answers**: Get precise answers with source citations
-- **Smart Suggestions**: Pre-built question templates for common educational queries
-- **Metadata Filtering**: Filter searches by book, class, or other criteria
+### 🤖 AI-Powered Analysis
+- **Structured JSON Output**: Returns well-formatted JSON matching the regulatory compliance format
+- **Source Citations**: Every response attributes information to the source PDF document
+- **Anti-Hallucination**: Strict rules prevent fabrication of gazette numbers, dates, or reasons
+- **Contextual Sessions**: Maintains conversation history for follow-up questions
 
-### 📊 Dashboard Interface
-- **Modern UI**: Glassmorphic design with responsive layout
-- **Chapter Library**: Visual grid of all uploaded chapters with filtering
-- **Upload Progress**: Real-time feedback during chapter indexing
-- **Statistics**: Track total chapters and recent uploads
-- **Chapter Details Modal**: Professional modal with comprehensive chapter information
+### 📊 Document Management
+- **Upload & Index**: Upload PDF regulatory documents with metadata
+- **List Documents**: View all indexed documents
+- **Delete Single Document**: Remove specific documents from the store
+- **Delete All Documents**: Clear all documents from both Gemini and local storage
+- **Persistent Storage**: Documents survive server restarts
 
-### 🔧 Technical Excellence
-- **Managed RAG**: No vector database required (handled by Google)
-- **Cost Effective**: Free storage and query-time embeddings
-- **Production Ready**: Docker support with full-stack deployment
-- **Fixed Store Names**: Consistent Gemini store naming across restarts
-- **CRUD Operations**: Complete Create, Read, Update, Delete functionality
+---
 
 ## 🚀 Getting Started
 
@@ -40,36 +60,28 @@ This solution addresses the need for accessible, AI-powered educational tools th
 Clone the repository and install dependencies:
 ```bash
 npm install
-cd frontend && npm install
 ```
 
 ### 2. Configuration
 Create a `.env` file in the root directory:
 ```env
 GEMINI_API_KEY=your_api_key_here
-PORT=1000
-STORE_NAME=ncert-rag-store-fixed
+PORT=3101
+STORE_NAME=banned-pharma-rag-store
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ### 3. Run the Application
 
 #### Development Mode
-Start the backend:
 ```bash
-npm run dev
-```
-
-Start the frontend:
-```bash
-cd frontend
 npm run dev
 ```
 
 #### Production Build
 ```bash
 npm run build
-cd frontend && npm run build
+npm start
 ```
 
 ### 4. Run with Docker
@@ -85,7 +97,6 @@ docker-compose up --build
 ```
 
 **Access Points:**
-- **Frontend**: `http://localhost:3102`
 - **Backend API**: `http://localhost:3101`
 
 #### Docker Commands
@@ -103,25 +114,40 @@ docker-compose up --build --force-recreate
 docker-compose down -v --remove-orphans
 ```
 
+---
+
 ## 📚 API Documentation
 
-### 1. Index Chapter
-Upload and index an NCERT chapter with metadata.
+### 1. Upload & Index Document
+Upload a banned drug PDF and index it for RAG search.
 
-**Endpoint:** `POST /api/index`  
+**Endpoint:** `POST /api/index`
 **Content-Type:** `multipart/form-data`
 
 **Curl Request:**
 ```bash
 curl -X POST http://localhost:3101/api/index \
-  -F "file=@/path/to/NCERT_Class10_Science_Chapter_1.pdf" \
-  -F 'metadata={"book": "science", "class": "10", "chapter": "Light - Reflection and Refraction"}'
+  -F "file=@data/banned-drugs-cdsco-1940.pdf" \
+  -F 'metadata={"source": "CDSCO", "type": "banned_drugs_list", "year": "1940"}'
 ```
 
-### 2. Search Chapters
-Perform semantic search across indexed chapters with optional filtering.
+**Response:**
+```json
+{
+  "message": "Document indexed successfully",
+  "result": {
+    "done": true,
+    "response": {
+      "documentName": "fileSearchStores/xxx/documents/yyy"
+    }
+  }
+}
+```
 
-**Endpoint:** `POST /api/search`  
+### 2. Search Medicine Status
+Search whether a medicine is banned in India. Returns structured JSON per the regulatory compliance format.
+
+**Endpoint:** `POST /api/search`
 **Content-Type:** `application/json`
 
 **Curl Request:**
@@ -129,25 +155,45 @@ Perform semantic search across indexed chapters with optional filtering.
 curl -X POST http://localhost:3101/api/search \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "What is photosynthesis and how does it work?",
-    "filter": "book=\"science\"",
-    "sessionId": "my-session-123"
+    "query": "Is paracetamol banned in India?",
+    "sessionId": "pharma-session-001"
   }'
 ```
 
-**Response:**
+**Expected Response (from AI):**
 ```json
 {
-  "text": "Photosynthesis is the process by which green plants...",
-  "groundingMetadata": {...},
-  "sessionId": "my-session-123"
+  "text": "{\"query\":\"Is paracetamol banned in India?\",\"medicine_searched\":\"Paracetamol\",\"total_results\":1,\"current_status\":\"open\",\"results\":[{\"gazette_id\":\"N/A\",\"pdf_name\":\"banned-drugs-cdsco-1940.pdf\",\"medicine_name\":\"Paracetamol\",\"date_of_ban\":\"N/A\",\"date_of_uplift\":\"N/A\",\"details\":\"Paracetamol itself is NOT banned in India. However, certain Fixed Dose Combinations (FDCs) containing paracetamol have been banned.\",\"reasons_for_ban\":\"N/A\",\"reasons_for_uplift\":\"N/A\",\"drug_category\":\"single_drug\",\"population_restriction\":\"none\",\"schedule_classification\":\"Schedule H\",\"controlled_status\":\"Not controlled\",\"source_authority\":\"CDSCO\",\"act_reference\":\"Drugs and Cosmetics Act 1940\",\"alternative_medicines\":\"Not specified in documents\",\"compliance_note\":\"N/A\"}],\"summary\":\"Paracetamol is not banned in India. It is a widely available over-the-counter and prescription analgesic.\",\"disclaimer\":\"This information is based on regulatory documents available in the system. For the latest regulatory status, always verify with the official CDSCO website (cdsco.gov.in) or the e-Gazette portal (egazette.gov.in). This is not medical or legal advice.\"}",
+  "groundingMetadata": {},
+  "sessionId": "pharma-session-001"
 }
 ```
 
-**Note:** The `sessionId` parameter is optional. If provided, the system will maintain conversation context for the last 5 Q&A pairs. If not provided, a new session ID will be generated automatically.
+**More Search Examples:**
+```bash
+# Check banned drug
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Is nimesulide banned in India?"}'
 
-### 3. List Chapters
-Get all indexed chapters with metadata and statistics.
+# Check FDC ban
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Tell me about phenylpropanolamine ban"}'
+
+# Check controlled substance
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Is tramadol a controlled substance?"}'
+
+# List recent bans
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Which drugs were banned in the latest notification?"}'
+```
+
+### 3. List All Documents
+Get all indexed regulatory documents.
 
 **Endpoint:** `GET /api/documents`
 
@@ -161,15 +207,15 @@ curl -X GET http://localhost:3101/api/documents
 {
   "documents": [
     {
-      "name": "files/1234567890-chapter1.pdf",
-      "displayName": "chapter1.pdf",
+      "name": "fileSearchStores/xxx/documents/yyy",
+      "displayName": "banned-drugs-cdsco-1940.pdf",
       "mimeType": "application/pdf",
-      "sizeBytes": 1048576,
-      "createTime": "2026-01-22T10:30:00Z",
+      "sizeBytes": 34703,
+      "createTime": "2026-02-16T10:30:00Z",
       "metadata": [
-        {"key": "book", "stringValue": "science"},
-        {"key": "class", "stringValue": "10"},
-        {"key": "chapter", "stringValue": "Light - Reflection and Refraction"}
+        {"key": "source", "stringValue": "CDSCO"},
+        {"key": "type", "stringValue": "banned_drugs_list"},
+        {"key": "year", "stringValue": "1940"}
       ],
       "state": "ACTIVE"
     }
@@ -178,14 +224,23 @@ curl -X GET http://localhost:3101/api/documents
 }
 ```
 
-### 4. Delete Chapter
-Delete a specific indexed chapter.
+### 4. Delete a Single Document
+Delete a specific regulatory document by its Gemini document name.
 
-**Endpoint:** `DELETE /api/documents/:documentId`
+**Endpoint:** `POST /api/documents/delete`
+**Content-Type:** `application/json`
 
-**Curl Request:**
+**Curl Request (recommended — send document name in body):**
 ```bash
-curl -X DELETE http://localhost:3101/api/documents/files%2F1234567890-chapter1.pdf
+# Use the full document name from the list API response
+curl -X POST http://localhost:3101/api/documents/delete \
+  -H "Content-Type: application/json" \
+  -d '{"documentId": "fileSearchStores/xxx/documents/yyy"}'
+```
+
+**Alternative: DELETE with URL-encoded path param (for simple IDs):**
+```bash
+curl -X DELETE "http://localhost:3101/api/documents/simple-doc-id"
 ```
 
 **Response:**
@@ -193,14 +248,39 @@ curl -X DELETE http://localhost:3101/api/documents/files%2F1234567890-chapter1.p
 {
   "message": "Document deleted successfully",
   "document": {
-    "name": "files/1234567890-chapter1.pdf",
-    "displayName": "chapter1.pdf"
+    "name": "fileSearchStores/xxx/documents/yyy",
+    "displayName": "banned-drugs-cdsco-1940.pdf"
   }
 }
 ```
 
-### 5. Store Information
-Get information about the Gemini store.
+### 5. Delete All Documents
+Delete all documents from both Gemini store and local storage.
+
+**Endpoint:** `DELETE /api/documents/all`
+
+**Curl Request:**
+```bash
+curl -X DELETE http://localhost:3101/api/documents/all
+```
+
+**Response:**
+```json
+{
+  "message": "All documents deleted",
+  "geminiDeleted": 3,
+  "geminiFailed": 0,
+  "localDeleted": 3,
+  "details": [
+    {"name": "fileSearchStores/xxx/documents/doc1", "success": true},
+    {"name": "fileSearchStores/xxx/documents/doc2", "success": true},
+    {"name": "fileSearchStores/xxx/documents/doc3", "success": true}
+  ]
+}
+```
+
+### 6. Store Information
+Get information about the Gemini file search store.
 
 **Endpoint:** `GET /api/store-info`
 
@@ -209,32 +289,36 @@ Get information about the Gemini store.
 curl -X GET http://localhost:3101/api/store-info
 ```
 
-### 6. Session Management
+**Response:**
+```json
+{
+  "storeName": "fileSearchStores/abcd1234",
+  "displayName": "banned-pharma-rag-store",
+  "documentsCount": 3
+}
+```
+
+### 7. Session Management
 
 #### Get Conversation History
-Retrieve the conversation history for a specific session.
-
-**Endpoint:** `GET /api/sessions/{sessionId}/history`
-
-**Curl Request:**
 ```bash
-curl -X GET http://localhost:3101/api/sessions/my-session-123/history
+curl -X GET http://localhost:3101/api/sessions/pharma-session-001/history
 ```
 
 **Response:**
 ```json
 {
-  "sessionId": "my-session-123",
+  "sessionId": "pharma-session-001",
   "history": [
     {
       "role": "user",
-      "content": "What is photosynthesis?",
-      "timestamp": "2024-01-22T10:30:00.000Z"
+      "content": "Is paracetamol banned?",
+      "timestamp": "2026-02-16T10:30:00.000Z"
     },
     {
-      "role": "model", 
-      "content": "Photosynthesis is the process...",
-      "timestamp": "2024-01-22T10:30:01.000Z"
+      "role": "model",
+      "content": "{...structured JSON response...}",
+      "timestamp": "2026-02-16T10:30:02.000Z"
     }
   ],
   "total": 2
@@ -242,21 +326,11 @@ curl -X GET http://localhost:3101/api/sessions/my-session-123/history
 ```
 
 #### Clear Session
-Clear the conversation history for a specific session.
-
-**Endpoint:** `DELETE /api/sessions/{sessionId}`
-
-**Curl Request:**
 ```bash
-curl -X DELETE http://localhost:3101/api/sessions/my-session-123
+curl -X DELETE http://localhost:3101/api/sessions/pharma-session-001
 ```
 
 #### Get Session Statistics
-Get statistics about active sessions.
-
-**Endpoint:** `GET /api/sessions/stats`
-
-**Curl Request:**
 ```bash
 curl -X GET http://localhost:3101/api/sessions/stats
 ```
@@ -264,136 +338,187 @@ curl -X GET http://localhost:3101/api/sessions/stats
 **Response:**
 ```json
 {
-  "totalSessions": 15,
-  "activeSessions": 8
+  "totalSessions": 5,
+  "activeSessions": 3
 }
 ```
 
-### 6. Health Check
-Check if the backend service is running.
-
-**Endpoint:** `GET /health`
-
-**Curl Request:**
+### 8. Health Check
 ```bash
 curl -X GET http://localhost:3101/health
 ```
+
+**Response:**
+```json
+{
+  "status": "ok"
+}
+```
+
+---
 
 ## 🏗️ Project Structure
 
 ```
 ├── src/
-│   ├── services/geminiService.ts    # Core Gemini API integration with persistence
-│   ├── controllers/ragController.ts # API request handling
-│   ├── routes/ragRoutes.ts         # Express routes
-│   ├── config/env.ts               # Environment configuration
-│   ├── data/                       # Persistent document storage
-│   └── server.ts                   # Application entry point
-├── frontend/
-│   ├── src/
-│   │   ├── main.js                 # Frontend application logic
-│   │   ├── style.css               # Glassmorphic UI styles
-│   │   └── config.js               # Environment-aware API configuration
-│   ├── index.html                  # Dashboard interface
-│   └── package.json                # Frontend dependencies
-├── docker-compose.yml              # Full-stack deployment
-├── deploy.sh                       # Automated deployment script
-└── README.md                       # This file
+│   ├── services/
+│   │   ├── geminiService.ts    # Core Gemini API integration (upload, search, delete, list)
+│   │   └── sessionManager.ts   # Conversation session management
+│   ├── controllers/
+│   │   └── ragController.ts    # Express request handlers
+│   ├── routes/
+│   │   └── ragRoutes.ts        # Express route definitions
+│   ├── config/
+│   │   └── env.ts              # Environment configuration
+│   ├── data/                   # Persistent document metadata (documents.json)
+│   ├── uploads/                # Temporary file uploads (cleaned after indexing)
+│   ├── app.ts                  # Express app setup
+│   └── server.ts               # Application entry point
+├── data/                       # Sample regulatory PDFs for upload
+│   ├── banned-drugs-cdsco-1940.pdf
+│   ├── cdsco_banned_01Jan2018.pdf
+│   └── delhi.pdf
+├── COPY_PASTE_PROMPTS.md       # System prompt for pharmaceutical regulatory AI
+├── docker-compose.yml          # Docker deployment
+├── deploy.sh                   # Automated deployment script
+├── .env                        # Environment variables
+├── .env.example                # Environment template
+├── package.json                # Node.js dependencies
+├── tsconfig.json               # TypeScript configuration
+└── README.md                   # This file
 ```
 
-## 🎯 Educational Use Cases
+---
 
-### For Students
-- **Quick Answers**: Get instant explanations of complex concepts
-- **Chapter Summaries**: Understand key points from any chapter
-- **Concept Clarification**: Ask follow-up questions for better understanding
-- **Interactive Learning**: Chat with chapters for personalized learning
+## 🔄 Quick Start: Upload Sample Data & Search
 
-### For Teachers
-- **Lesson Planning**: Extract key concepts and examples from chapters
-- **Question Generation**: Create quiz questions based on chapter content
-- **Content Organization**: Manage and categorize educational materials
-- **Student Support**: Help students find specific information quickly
+### Step 1: Start the server
+```bash
+npm run dev
+```
 
-### For Administrators
-- **Content Management**: Track and organize institutional educational resources
-- **Usage Analytics**: Monitor which chapters and topics are most accessed
-- **Quality Assurance**: Ensure comprehensive coverage of curriculum topics
-- **Resource Planning**: Understand content usage patterns
+### Step 2: Upload all sample PDFs
+```bash
+# Upload CDSCO 1940 banned drugs list
+curl -X POST http://localhost:3101/api/index \
+  -F "file=@data/banned-drugs-cdsco-1940.pdf" \
+  -F 'metadata={"source": "CDSCO", "type": "banned_drugs_list", "document": "Drugs and Cosmetics Act 1940"}'
 
-## 🔮 Technical Features
+# Upload CDSCO 2018 consolidated list
+curl -X POST http://localhost:3101/api/index \
+  -F "file=@data/cdsco_banned_01Jan2018.pdf" \
+  -F 'metadata={"source": "CDSCO", "type": "banned_drugs_consolidated", "year": "2018"}'
 
-### Data Persistence
-- **File-based Storage**: Documents persist across server restarts
-- **Fixed Store Names**: Consistent Gemini store identification
-- **Metadata Tracking**: Complete document information storage
-- **Backup Ready**: JSON-based storage for easy backup/restore
+# Upload Delhi state circular
+curl -X POST http://localhost:3101/api/index \
+  -F "file=@data/delhi.pdf" \
+  -F 'metadata={"source": "Delhi State Drugs Department", "type": "state_circular"}'
+```
 
-### UI/UX Enhancements
-- **Professional Modals**: Beautiful chapter details with comprehensive information
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
-- **Dark Theme**: Eye-friendly glassmorphic design
-- **Interactive Filters**: Smart filtering by book, class, and other criteria
-- **Real-time Updates**: Automatic refresh after operations
+### Step 3: Verify documents are indexed
+```bash
+curl -X GET http://localhost:3101/api/documents
+```
 
-### Performance Optimizations
-- **Efficient Caching**: Smart document caching for faster access
-- **Optimized Builds**: Production-ready Docker containers
-- **Health Monitoring**: Built-in health checks for reliability
-- **Error Handling**: Comprehensive error handling and user feedback
+### Step 4: Search for banned medicines
+```bash
+# Check if a specific medicine is banned
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Is nimesulide banned in India?"}'
 
-## 🏆 Hackathon Alignment
+# Check FDC bans
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Which fixed dose combinations containing paracetamol are banned?"}'
 
-This solution directly addresses the **Innovation for Education Equity** theme by:
+# General query
+curl -X POST http://localhost:3101/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "List all drugs banned under Section 26A of the Drugs and Cosmetics Act"}'
+```
 
-1. **Accessibility**: Making NCERT content searchable and interactive
-2. **Equity**: Providing free, AI-powered educational assistance
-3. **Innovation**: Leveraging cutting-edge RAG technology for education
-4. **Scalability**: Built to handle content from multiple classes and subjects
-5. **Open Source**: Designed as a digital public good for educational institutions
-6. **Persistence**: Reliable data storage for institutional use
+---
+
+## 📊 Expected Search Output Format
+
+Every search response returns structured JSON following the Government of India Pharmaceutical Regulatory Compliance format:
+
+```json
+{
+  "query": "user's original query",
+  "medicine_searched": "corrected/standardized medicine name",
+  "total_results": 1,
+  "current_status": "banned | approved | scheduled | controlled | open | unknown",
+  "results": [
+    {
+      "gazette_id": "GSR 91(E) — or N/A if not found",
+      "pdf_name": "source PDF filename",
+      "medicine_name": "Full medicine name as in document",
+      "date_of_ban": "DD MMM YYYY — or N/A",
+      "date_of_uplift": "DD MMM YYYY — or N/A",
+      "details": "Comprehensive paragraph from documents",
+      "reasons_for_ban": "Specific reasons from documents",
+      "reasons_for_uplift": "N/A if not lifted",
+      "drug_category": "single_drug | fdc | import_banned",
+      "population_restriction": "all | children | women | none",
+      "schedule_classification": "Schedule H | H1 | X | Not Scheduled",
+      "controlled_status": "NDPS controlled | Not controlled",
+      "source_authority": "CDSCO, Ministry of Health, etc.",
+      "act_reference": "Drugs and Cosmetics Act 1940 Section 26A",
+      "alternative_medicines": "From documents or 'Not specified'",
+      "compliance_note": "Penalties, transition periods, etc."
+    }
+  ],
+  "summary": "2-3 line human-readable summary",
+  "disclaimer": "Verification advisory with official website links"
+}
+```
+
+---
 
 ## 🔧 Configuration
 
 ### Environment Variables
-- `GEMINI_API_KEY`: Your Google Gemini API key (required)
-- `PORT`: Backend server port (default: 1000)
-- `STORE_NAME`: Gemini file search store name (default: ncert-rag-store-fixed)
-- `GEMINI_MODEL`: Gemini model to use (default: gemini-2.5-flash)
-
-### Port Configuration
-- **Backend**: Port 3101
-- **Frontend**: Port 3102 (Docker), Port 5173 (Development)
-
-## 🧪 Testing
-
-### Manual Testing
-1. Upload a chapter using the Upload Chapter section
-2. Go to "My Chapters" section to view uploaded chapters
-3. Click "Details" button to see comprehensive chapter information
-4. Use "Smart Search" to ask questions about uploaded content
-5. Test filtering by book and class
-6. Try deleting chapters and verify persistence
-
-### API Testing
-```bash
-# Test health check
-curl http://localhost:3101/health
-
-# Test document listing
-curl http://localhost:3101/api/documents
-
-# Test store information
-curl http://localhost:3101/api/store-info
-```
-
-## 📄 License
-MIT License - Built for educational equity and open collaboration.
-
-## 🤝 Contributing
-This project is open for contributions to improve educational accessibility. Please follow standard GitHub contribution guidelines.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GEMINI_API_KEY` | Google Gemini API key (required) | — |
+| `PORT` | Backend server port | `3101` |
+| `STORE_NAME` | Gemini file search store name | `banned-pharma-rag-store` |
+| `GEMINI_MODEL` | Gemini model to use | `gemini-2.5-flash` |
 
 ---
 
-*Built with ❤️ for the Innovation for Education Equity Hackathon 2026*
-*Empowering 1 million public schools through AI-powered educational tools*
+## 🧪 Testing
+
+### Quick API Test
+```bash
+# Health check
+curl http://localhost:3101/health
+
+# List documents
+curl http://localhost:3101/api/documents
+
+# Store info
+curl http://localhost:3101/api/store-info
+```
+
+### Full Integration Test
+1. Start the server with `npm run dev`
+2. Upload all 3 sample PDFs from the `data/` folder (see Quick Start above)
+3. Search for known banned drugs (e.g., nimesulide, phenylpropanolamine)
+4. Verify the response format matches the expected output
+5. Test delete single document and delete all documents
+6. Verify documents are removed from both Gemini store and local storage
+
+---
+
+## 📄 License
+MIT License
+
+## 🤝 Contributing
+Contributions are welcome. Please follow standard GitHub contribution guidelines.
+
+---
+
+*Built for pharmaceutical regulatory compliance and drug safety awareness in India 🇮🇳*

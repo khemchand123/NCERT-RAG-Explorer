@@ -1,35 +1,112 @@
+# ==============================================================================
+# NCERT RAG Explorer — Docker Compose (Lehana.in Standards)
+# ==============================================================================
+# Backend:  https://medical.lehana.in/ncert/api/*  |  /ncert/health
+# Frontend: https://medical.lehana.in/ncert        |  SPA served at /ncert/*
+#
+# Both services share the medical.lehana.in subdomain under /ncert path.
+# Backend handles /ncert/api and /ncert/health at higher priority (115).
+# Frontend catches all other /ncert/* requests at lower priority (110).
+# Traefik strips /ncert prefix; containers see requests at /.
+#
+# VPS forwards to RIG via vm-traefik service. No separate VPS services needed.
+# ==============================================================================
+
+networks:
+  default:
+    name: root_default
+    external: true
+
 services:
-  backend:
-    build: .
-    ports:
-      - "3101:3101"
+  # ============================================================================
+  # NCERT RAG Backend — Express/TypeScript API
+  # ============================================================================
+  # Routes: medical.lehana.in/ncert/api/* → strips /ncert → container:3101/api/*
+  #         medical.lehana.in/ncert/health → strips /ncert → container:3101/health
+  # ============================================================================
+  ncert-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ncert-backend
+    restart: unless-stopped
+    networks:
+      default:
+        ipv4_address: 172.19.0.10
+    expose:
+      - "3101"
     env_file:
       - .env
-    volumes:
-      - uploads_data:/app/src/uploads
-      - documents_data:/app/src/data
     environment:
       - NODE_ENV=production
+      - SERVER_HOST=${SERVER_HOST:-lehana-rig}
+    volumes:
+      - ncert-uploads:/app/src/uploads
+      - ncert-documents:/app/src/data
+    labels:
+      - "traefik.enable=true"
+      # Service port
+      - "traefik.http.services.ncert-backend.loadbalancer.server.port=3101"
+      # Router: medical.lehana.in /ncert/api + /ncert/health → backend
+      # (rig-)? needed because custom subdomain differs from container name
+      # RIG defaultRule only handles rig-{containerName}, not rig-{customSubdomain}
+      - "traefik.http.routers.ncert-backend.rule=HostRegexp(`^(rig-)?medical\\.(lehana\\.in|aidhunik\\.com)$$`) && (PathPrefix(`/ncert/api`) || Path(`/ncert/health`))"
+      - "traefik.http.routers.ncert-backend.entrypoints=web"
+      - "traefik.http.routers.ncert-backend.priority=115"
+      # Strip /ncert prefix before forwarding to container
+      - "traefik.http.middlewares.ncert-strip.stripprefix.prefixes=/ncert"
+      - "traefik.http.routers.ncert-backend.middlewares=ncert-strip"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3101/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:3101/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  frontend:
+  # ============================================================================
+  # NCERT RAG Frontend — Static SPA served by `serve`
+  # ============================================================================
+  # Routes: medical.lehana.in/ncert/* → strips /ncert → container:3102/*
+  # Lower priority (110) so backend paths (/ncert/api, /ncert/health) win
+  # ============================================================================
+  ncert-frontend:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: https://api.aidhunik.com/ncert/api
-    ports:
-      - "3102:3102"
+        # Relative API URL — works on both lehana.in and aidhunik.com
+        VITE_API_URL: /ncert/api
+    container_name: ncert-frontend
+    restart: unless-stopped
+    networks:
+      default:
+        ipv4_address: 172.19.0.11
+    expose:
+      - "3102"
     depends_on:
-      backend:
+      ncert-backend:
         condition: service_healthy
     environment:
       - NODE_ENV=production
+    labels:
+      - "traefik.enable=true"
+      # Service port
+      - "traefik.http.services.ncert-frontend.loadbalancer.server.port=3102"
+      # Router: medical.lehana.in/ncert/* catch-all → frontend
+      # (rig-)? needed because custom subdomain differs from container name
+      - "traefik.http.routers.ncert-frontend.rule=HostRegexp(`^(rig-)?medical\\.(lehana\\.in|aidhunik\\.com)$$`) && PathPrefix(`/ncert`)"
+      - "traefik.http.routers.ncert-frontend.entrypoints=web"
+      - "traefik.http.routers.ncert-frontend.priority=110"
+      # Reuse same strip middleware defined by backend
+      - "traefik.http.routers.ncert-frontend.middlewares=ncert-strip"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3102/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
-  uploads_data:
-  documents_data:
+  ncert-uploads:
+    name: ncert-uploads
+  ncert-documents:
+    name: ncert-documents

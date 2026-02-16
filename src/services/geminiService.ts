@@ -17,16 +17,19 @@ function loadSystemInstruction(): string {
         if (fs.existsSync(PROMPTS_FILE)) {
             const promptsContent = fs.readFileSync(PROMPTS_FILE, 'utf8');
 
-            // Extract the system instruction from the markdown file
-            // Look for the content between the first ``` blocks
-            const codeBlockRegex = /```\n([\s\S]*?)\n```/;
-            const match = promptsContent.match(codeBlockRegex);
+            // The entire file IS the system prompt — use it directly
+            // Strip the markdown code block fences (```json ... ```) but keep the XML-style tags
+            // Remove only the JSON output format code block markers, keep the content
+            const cleanedContent = promptsContent
+                .replace(/^```json\s*$/gm, '')  // Remove ```json markers
+                .replace(/^```\s*$/gm, '')       // Remove ``` markers
+                .trim();
 
-            if (match && match[1]) {
-                console.log('Loaded system instruction from COPY_PASTE_PROMPTS.md');
-                return match[1].trim();
+            if (cleanedContent.length > 100) {
+                console.log(`Loaded system instruction from COPY_PASTE_PROMPTS.md (${cleanedContent.length} chars)`);
+                return cleanedContent;
             } else {
-                console.warn('Could not extract system instruction from COPY_PASTE_PROMPTS.md');
+                console.warn('COPY_PASTE_PROMPTS.md content too short, using fallback');
             }
         } else {
             console.warn('COPY_PASTE_PROMPTS.md file not found');
@@ -36,7 +39,7 @@ function loadSystemInstruction(): string {
     }
 
     // Fallback to default instruction
-    return "You are a helpful assistant. Only answer questions using the provided documents.";
+    return "You are the Government of India Pharmaceutical Regulatory Compliance Assistant. Analyze pharmaceutical regulatory documents and provide accurate, structured information about the regulatory status of medicines in India. Only answer questions using the provided documents.";
 }
 
 // Load the system instruction at startup
@@ -243,13 +246,11 @@ export class GeminiService {
 
             console.log(`Attempting to list documents from Gemini store: ${store.name}`);
 
-            // Try different possible API methods for listing documents
-            let documents = null;
-            let documentList = [];
+            let documentList: any[] = [];
 
             try {
-                // Method 1: Try the documents.list approach
-                documents = await (this.client as any).fileSearchStores.documents.list({
+                // Use the official documents.list API
+                const documents = await this.client.fileSearchStores.documents.list({
                     parent: store.name,
                 });
 
@@ -267,35 +268,23 @@ export class GeminiService {
                         state: doc.state || 'ACTIVE'
                     });
                 }
-            } catch (apiError) {
-                console.log('documents.list method not available, trying alternative...');
+            } catch (apiError: any) {
+                console.error('documents.list API failed:', apiError?.message || apiError);
+                throw new Error('Unable to access Gemini document list API');
+            }
 
-                // Method 2: Try alternative API structure
-                try {
-                    const listResponse = await (this.client as any).fileSearchStores.listFiles({
-                        fileSearchStoreName: store.name,
-                        config: { pageSize: 100 }
-                    });
-
-                    console.log('Using listFiles method');
-
-                    if (listResponse.page) {
-                        for (const doc of listResponse.page) {
-                            documentList.push({
-                                name: doc.name,
-                                displayName: doc.displayName || 'Unknown',
-                                mimeType: doc.mimeType || 'application/octet-stream',
-                                sizeBytes: doc.sizeBytes || 0,
-                                createTime: doc.createTime || new Date().toISOString(),
-                                updateTime: doc.updateTime || new Date().toISOString(),
-                                metadata: doc.customMetadata || [],
-                                state: doc.state || 'ACTIVE'
-                            });
-                        }
+            // Sync local store with Gemini store
+            if (documentList.length > 0) {
+                // Update local store with Gemini document names for deletion support
+                for (const geminiDoc of documentList) {
+                    const localDoc = documentsStore.find(d =>
+                        d.displayName === geminiDoc.displayName ||
+                        d.geminiDocumentName === geminiDoc.name
+                    );
+                    if (localDoc && !localDoc.geminiDocumentName) {
+                        localDoc.geminiDocumentName = geminiDoc.name;
+                        saveDocuments(documentsStore);
                     }
-                } catch (altApiError: any) {
-                    console.log('Alternative API method also failed:', altApiError?.message || altApiError);
-                    throw new Error('Unable to access Gemini document list API');
                 }
             }
 
@@ -320,90 +309,170 @@ export class GeminiService {
                 throw new Error('Store name is undefined');
             }
 
-            console.log(`Attempting to delete document from Gemini store: ${documentId}`);
+            console.log(`Attempting to delete document: ${documentId}`);
 
-            // Extract document name from the full path if needed
-            let documentName = documentId;
+            // Resolve the full Gemini document name
             let geminiDocumentName = '';
+            let localDoc: any = null;
 
-            if (documentId.includes('/documents/')) {
-                documentName = documentId.split('/documents/')[1];
+            if (documentId.includes('fileSearchStores/') && documentId.includes('/documents/')) {
+                // Already a full Gemini document name
                 geminiDocumentName = documentId;
             } else if (documentId.startsWith('files/')) {
-                // Handle our local naming convention - need to find the actual Gemini document name
-                const localDoc = documentsStore.find(doc => doc.name === documentId);
+                // Our local naming convention — find the actual Gemini document name
+                localDoc = documentsStore.find(doc => doc.name === documentId);
                 if (localDoc && localDoc.geminiDocumentName) {
                     geminiDocumentName = localDoc.geminiDocumentName;
-                    documentName = localDoc.geminiDocumentName.split('/documents/')[1];
                 } else {
-                    console.log('Document not found in local store, attempting direct deletion...');
-                    geminiDocumentName = `${store.name}/documents/${documentId}`;
+                    // Try to find by listing documents from Gemini
+                    console.log('Document not in local store with Gemini name, searching Gemini store...');
+                    const geminiDocs = await this.listDocumentsFromGemini(store.name);
+                    const matchingDoc = geminiDocs.find(d =>
+                        d.displayName === localDoc?.displayName ||
+                        d.name?.includes(documentId)
+                    );
+                    if (matchingDoc) {
+                        geminiDocumentName = matchingDoc.name;
+                    }
                 }
             } else {
+                // Assume it's a document ID, construct full path
                 geminiDocumentName = `${store.name}/documents/${documentId}`;
             }
 
-            console.log(`Attempting to delete Gemini document: ${geminiDocumentName}`);
-
-            // Try different possible API methods for deleting documents
-            try {
-                // Method 1: Try the documents.delete approach
-                await (this.client as any).fileSearchStores.documents.delete({
-                    name: geminiDocumentName
-                });
-                console.log(`Document deleted using documents.delete method: ${documentName}`);
-            } catch (apiError: any) {
-                console.log('documents.delete method failed:', apiError?.message || apiError);
-
-                // Method 2: Try alternative deletion method if available
+            // Delete from Gemini store
+            let geminiDeleted = false;
+            if (geminiDocumentName) {
                 try {
-                    await (this.client as any).fileSearchStores.deleteFile({
-                        name: geminiDocumentName
+                    console.log(`Deleting from Gemini: ${geminiDocumentName}`);
+                    await this.client.fileSearchStores.documents.delete({
+                        name: geminiDocumentName,
+                        config: { force: true }
                     });
-                    console.log(`Document deleted using deleteFile method: ${documentName}`);
-                } catch (altApiError: any) {
-                    console.log('Alternative deletion method also failed:', altApiError?.message || altApiError);
-                    console.log('Document may not exist in Gemini store or API method unavailable');
+                    console.log(`Successfully deleted from Gemini store: ${geminiDocumentName}`);
+                    geminiDeleted = true;
+                } catch (apiError: any) {
+                    console.error('Gemini delete failed:', apiError?.message || apiError);
+                    // Don't throw — still remove from local store
                 }
+            } else {
+                console.warn('Could not resolve Gemini document name, performing local deletion only');
             }
 
-            // Remove from local storage for consistency
+            // Remove from local storage
             const localIndex = documentsStore.findIndex(doc =>
                 doc.name === documentId ||
-                doc.geminiDocumentName?.includes(documentName)
+                doc.geminiDocumentName === geminiDocumentName ||
+                doc.geminiDocumentName === documentId
             );
 
             let deletedDoc = null;
             if (localIndex !== -1) {
                 deletedDoc = documentsStore.splice(localIndex, 1)[0];
                 saveDocuments(documentsStore);
-                console.log(`Removed document from local storage. Total documents: ${documentsStore.length}`);
+                console.log(`Removed from local storage. Remaining documents: ${documentsStore.length}`);
             }
 
             return {
-                message: 'Document deletion attempted (check logs for Gemini API status)',
-                document: deletedDoc || { name: documentId, displayName: documentName }
+                message: geminiDeleted
+                    ? 'Document deleted successfully'
+                    : 'Document removed from local storage (Gemini deletion may have failed)',
+                document: deletedDoc || { name: documentId, displayName: documentId }
             };
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error in delete operation:', error);
 
-            // Fallback to local deletion
-            console.log('Performing local deletion only...');
-
+            // Fallback to local deletion only
             const index = documentsStore.findIndex(doc => doc.name === documentId);
 
             if (index === -1) {
-                throw new Error('Document not found in local storage');
+                throw new Error('Document not found');
             }
 
             const deletedDoc = documentsStore.splice(index, 1)[0];
             saveDocuments(documentsStore);
-            console.log(`Deleted document from local storage: ${deletedDoc.displayName}`);
+            console.log(`Deleted from local storage only: ${deletedDoc.displayName}`);
 
             return {
-                message: 'Document deleted from local storage (Gemini API unavailable)',
+                message: 'Document deleted from local storage (Gemini API error)',
                 document: deletedDoc
+            };
+        }
+    }
+
+    // Helper to list documents directly from Gemini (for internal use)
+    private async listDocumentsFromGemini(storeName: string): Promise<any[]> {
+        const documentList: any[] = [];
+        try {
+            const documents = await this.client.fileSearchStores.documents.list({
+                parent: storeName,
+            });
+            for await (const doc of documents) {
+                documentList.push(doc);
+            }
+        } catch (error: any) {
+            console.error('Failed to list documents from Gemini:', error?.message);
+        }
+        return documentList;
+    }
+
+    async deleteAllDocuments() {
+        try {
+            const store = await this.getOrCreateStore(config.storeName);
+
+            if (!store.name) {
+                throw new Error('Store name is undefined');
+            }
+
+            console.log('Deleting all documents...');
+
+            // Get all documents from Gemini store
+            const geminiDocs = await this.listDocumentsFromGemini(store.name);
+            const deleteResults: { name: string; success: boolean; error?: string }[] = [];
+
+            // Delete each document from Gemini
+            for (const doc of geminiDocs) {
+                try {
+                    await this.client.fileSearchStores.documents.delete({
+                        name: doc.name,
+                        config: { force: true }
+                    });
+                    deleteResults.push({ name: doc.name, success: true });
+                    console.log(`Deleted from Gemini: ${doc.name}`);
+                } catch (error: any) {
+                    deleteResults.push({ name: doc.name, success: false, error: error?.message });
+                    console.error(`Failed to delete ${doc.name}:`, error?.message);
+                }
+            }
+
+            // Clear local storage
+            const localCount = documentsStore.length;
+            documentsStore = [];
+            saveDocuments(documentsStore);
+
+            return {
+                message: 'All documents deleted',
+                geminiDeleted: deleteResults.filter(r => r.success).length,
+                geminiFailed: deleteResults.filter(r => !r.success).length,
+                localDeleted: localCount,
+                details: deleteResults
+            };
+
+        } catch (error: any) {
+            console.error('Error deleting all documents:', error);
+
+            // Fallback: at least clear local storage
+            const localCount = documentsStore.length;
+            documentsStore = [];
+            saveDocuments(documentsStore);
+
+            return {
+                message: 'Local storage cleared (Gemini deletion may have failed)',
+                geminiDeleted: 0,
+                geminiFailed: 0,
+                localDeleted: localCount,
+                details: []
             };
         }
     }

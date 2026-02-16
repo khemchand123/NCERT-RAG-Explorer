@@ -1,0 +1,119 @@
+[
+  {
+    "name": "files/1771249497826-1771249488612-banned-drugs-cdsco-1940.pdf",
+    "displayName": "1771249488612-banned-drugs-cdsco-1940.pdf",
+    "mimeType": "application/pdf",
+    "sizeBytes": 34703,
+    "createTime": "2026-02-16T13:44:57.826Z",
+    "updateTime": "2026-02-16T13:44:57.826Z",
+    "metadata": [
+      {
+        "key": "source",
+        "stringValue": "CDSCO"
+      },
+      {
+        "key": "type",
+        "stringValue": "banned_drugs_list"
+      },
+      {
+        "key": "document",
+        "stringValue": "Drugs and Cosmetics Act 1940"
+      }
+    ],
+    "state": "ACTIVE",
+    "geminiDocumentName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj/documents/1771249488612banneddrugscds-ilxtynm9pvp7",
+    "geminiStoreName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj"
+  },
+  {
+    "name": "files/1771249509229-1771249497857-cdsco_banned_01Jan2018.pdf",
+    "displayName": "1771249497857-cdsco_banned_01Jan2018.pdf",
+    "mimeType": "application/pdf",
+    "sizeBytes": 504075,
+    "createTime": "2026-02-16T13:45:09.229Z",
+    "updateTime": "2026-02-16T13:45:09.229Z",
+    "metadata": [
+      {
+        "key": "source",
+        "stringValue": "CDSCO"
+      },
+      {
+        "key": "type",
+        "stringValue": "banned_drugs_consolidated"
+      },
+      {
+        "key": "year",
+        "stringValue": "2018"
+      }
+    ],
+    "state": "ACTIVE",
+    "geminiDocumentName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj/documents/1771249497857cdscobanned01j-sd9ppde6l0gz",
+    "geminiStoreName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj"
+  },
+  {
+    "name": "files/1771249510766-1771249502690-banned-drugs-cdsco-1940.pdf",
+    "displayName": "1771249502690-banned-drugs-cdsco-1940.pdf",
+    "mimeType": "application/pdf",
+    "sizeBytes": 34703,
+    "createTime": "2026-02-16T13:45:10.766Z",
+    "updateTime": "2026-02-16T13:45:10.766Z",
+    "metadata": [
+      {
+        "key": "source",
+        "stringValue": "CDSCO"
+      },
+      {
+        "key": "type",
+        "stringValue": "banned_drugs_list"
+      }
+    ],
+    "state": "ACTIVE",
+    "geminiDocumentName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj/documents/1771249502690banneddrugscds-pzhikbl8dx94",
+    "geminiStoreName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj"
+  },
+  {
+    "name": "files/1771249538823-1771249527002-cdsco_banned_01Jan2018.pdf",
+    "displayName": "1771249527002-cdsco_banned_01Jan2018.pdf",
+    "mimeType": "application/pdf",
+    "sizeBytes": 504075,
+    "createTime": "2026-02-16T13:45:38.823Z",
+    "updateTime": "2026-02-16T13:45:38.823Z",
+    "metadata": [
+      {
+        "key": "source",
+        "stringValue": "CDSCO"
+      },
+      {
+        "key": "type",
+        "stringValue": "banned_drugs_consolidated"
+      },
+      {
+        "key": "year",
+        "stringValue": "2018"
+      }
+    ],
+    "state": "ACTIVE",
+    "geminiDocumentName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj/documents/1771249527002cdscobanned01j-gnrnqio99ydm",
+    "geminiStoreName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj"
+  },
+  {
+    "name": "files/1771249604414-1771249594020-delhi.pdf",
+    "displayName": "1771249594020-delhi.pdf",
+    "mimeType": "application/pdf",
+    "sizeBytes": 793602,
+    "createTime": "2026-02-16T13:46:44.414Z",
+    "updateTime": "2026-02-16T13:46:44.414Z",
+    "metadata": [
+      {
+        "key": "source",
+        "stringValue": "Delhi State Drugs Department"
+      },
+      {
+        "key": "type",
+        "stringValue": "state_circular"
+      }
+    ],
+    "state": "ACTIVE",
+    "geminiDocumentName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj/documents/1771249594020delhipdf-7srpslm4afw4",
+    "geminiStoreName": "fileSearchStores/bannedpharmaragstore-vtbuf69a7gwj"
+  }
+]

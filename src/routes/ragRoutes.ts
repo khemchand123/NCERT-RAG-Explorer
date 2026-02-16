@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage,
     limits: {
         fileSize: 50 * 1024 * 1024 // 50MB limit
@@ -38,10 +38,16 @@ const upload = multer({
     }
 });
 
+// Document management routes
 router.post('/index', upload.single('file'), ragController.indexDocument);
 router.post('/search', ragController.search);
 router.get('/documents', ragController.listDocuments);
-router.delete('/documents/:documentId', ragController.deleteDocument);
+
+// Delete routes
+router.delete('/documents/all', ragController.deleteAllDocuments);     // DELETE /api/documents/all — delete all docs
+router.post('/documents/delete', ragController.deleteDocument);        // POST /api/documents/delete — body: { documentId: "..." }
+router.delete('/documents/:documentId', ragController.deleteDocument); // DELETE /api/documents/:documentId — for simple IDs
+
 router.get('/store-info', ragController.getStoreInfo);
 
 // Session management routes

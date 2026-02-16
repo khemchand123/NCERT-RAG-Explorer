@@ -44,7 +44,7 @@ export const indexDocument = async (req: Request, res: Response) => {
         res.json({ message: 'Document indexed successfully', result });
     } catch (error: any) {
         console.error('Error indexing document:', error);
-        
+
         // Clean up file if it exists and there was an error
         if (req.file && fs.existsSync(req.file.path)) {
             try {
@@ -53,7 +53,7 @@ export const indexDocument = async (req: Request, res: Response) => {
                 console.warn('Failed to cleanup file after error:', cleanupError);
             }
         }
-        
+
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 };
@@ -88,13 +88,24 @@ export const listDocuments = async (req: Request, res: Response) => {
 
 export const deleteDocument = async (req: Request, res: Response) => {
     try {
-        const documentId = req.params.documentId as string;
-        
+        // Support multiple ways to pass documentId:
+        // 1. Request body (POST /api/documents/delete): { "documentId": "..." }
+        // 2. Route param (DELETE /api/documents/:documentId)
+        // 3. Query param (?id=...)
+        const documentId = req.body?.documentId
+            || req.params?.documentId
+            || (req.query?.id as string);
+
         if (!documentId) {
-            return res.status(400).json({ error: 'Document ID is required' });
+            return res.status(400).json({
+                error: 'Document ID is required. Pass as body.documentId, route param, or query ?id='
+            });
         }
-        
-        const result = await geminiService.deleteDocument(documentId);
+
+        // Decode URI-encoded document IDs (e.g., files%2F123 -> files/123)
+        const decodedId = decodeURIComponent(documentId);
+
+        const result = await geminiService.deleteDocument(decodedId);
         res.json(result);
     } catch (error: any) {
         console.error('Error deleting document:', error);
@@ -103,6 +114,16 @@ export const deleteDocument = async (req: Request, res: Response) => {
         } else {
             res.status(500).json({ error: error.message || 'Internal Server Error' });
         }
+    }
+};
+
+export const deleteAllDocuments = async (req: Request, res: Response) => {
+    try {
+        const result = await geminiService.deleteAllDocuments();
+        res.json(result);
+    } catch (error: any) {
+        console.error('Error deleting all documents:', error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 };
 
@@ -119,11 +140,11 @@ export const getStoreInfo = async (req: Request, res: Response) => {
 export const getConversationHistory = async (req: Request, res: Response) => {
     try {
         const sessionId = req.params.sessionId as string;
-        
+
         if (!sessionId) {
             return res.status(400).json({ error: 'Session ID is required' });
         }
-        
+
         const history = geminiService.getConversationHistory(sessionId);
         res.json({ sessionId, history, total: history.length });
     } catch (error: any) {
@@ -135,11 +156,11 @@ export const getConversationHistory = async (req: Request, res: Response) => {
 export const clearSession = async (req: Request, res: Response) => {
     try {
         const sessionId = req.params.sessionId as string;
-        
+
         if (!sessionId) {
             return res.status(400).json({ error: 'Session ID is required' });
         }
-        
+
         geminiService.clearSession(sessionId);
         res.json({ message: 'Session cleared successfully', sessionId });
     } catch (error: any) {
