@@ -69,6 +69,7 @@ GEMINI_API_KEY=your_api_key_here
 PORT=3101
 STORE_NAME=banned-pharma-rag-store
 GEMINI_MODEL=gemini-2.5-flash
+SERVER_HOST=medical.lehana.in
 ```
 
 ### 3. Run the Application
@@ -97,7 +98,8 @@ docker-compose up --build
 ```
 
 **Access Points:**
-- **Backend API**: `http://localhost:3101`
+- **Backend API**: `https://medical.lehana.in/ncert` (Production) / `http://localhost:3101` (Local)
+- **Frontend SPA**: `https://medical.lehana.in/ncert/` (Production) / `http://localhost:3102` (Local)
 
 #### Docker Commands
 ```bash
@@ -118,6 +120,8 @@ docker-compose down -v --remove-orphans
 
 ## 📚 API Documentation
 
+Base URL (Production): `https://medical.lehana.in/ncert`
+
 ### 1. Upload & Index Document
 Upload a banned drug PDF and index it for RAG search.
 
@@ -126,7 +130,7 @@ Upload a banned drug PDF and index it for RAG search.
 
 **Curl Request:**
 ```bash
-curl -X POST http://localhost:3101/api/index \
+curl -X POST https://medical.lehana.in/ncert/api/index \
   -F "file=@data/banned-drugs-cdsco-1940.pdf" \
   -F 'metadata={"source": "CDSCO", "type": "banned_drugs_list", "year": "1940"}'
 ```
@@ -152,7 +156,7 @@ Search whether a medicine is banned in India. Returns structured JSON per the re
 
 **Curl Request:**
 ```bash
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "Is paracetamol banned in India?",
@@ -172,22 +176,22 @@ curl -X POST http://localhost:3101/api/search \
 **More Search Examples:**
 ```bash
 # Check banned drug
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Is nimesulide banned in India?"}'
 
 # Check FDC ban
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Tell me about phenylpropanolamine ban"}'
 
 # Check controlled substance
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Is tramadol a controlled substance?"}'
 
 # List recent bans
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Which drugs were banned in the latest notification?"}'
 ```
@@ -199,7 +203,7 @@ Get all indexed regulatory documents.
 
 **Curl Request:**
 ```bash
-curl -X GET http://localhost:3101/api/documents
+curl -X GET https://medical.lehana.in/ncert/api/documents
 ```
 
 **Response:**
@@ -233,14 +237,14 @@ Delete a specific regulatory document by its Gemini document name.
 **Curl Request (recommended — send document name in body):**
 ```bash
 # Use the full document name from the list API response
-curl -X POST http://localhost:3101/api/documents/delete \
+curl -X POST https://medical.lehana.in/ncert/api/documents/delete \
   -H "Content-Type: application/json" \
   -d '{"documentId": "fileSearchStores/xxx/documents/yyy"}'
 ```
 
 **Alternative: DELETE with URL-encoded path param (for simple IDs):**
 ```bash
-curl -X DELETE "http://localhost:3101/api/documents/simple-doc-id"
+curl -X DELETE "https://medical.lehana.in/ncert/api/documents/simple-doc-id"
 ```
 
 **Response:**
@@ -261,7 +265,7 @@ Delete all documents from both Gemini store and local storage.
 
 **Curl Request:**
 ```bash
-curl -X DELETE http://localhost:3101/api/documents/all
+curl -X DELETE https://medical.lehana.in/ncert/api/documents/all
 ```
 
 **Response:**
@@ -286,7 +290,7 @@ Get information about the Gemini file search store.
 
 **Curl Request:**
 ```bash
-curl -X GET http://localhost:3101/api/store-info
+curl -X GET https://medical.lehana.in/ncert/api/store-info
 ```
 
 **Response:**
@@ -302,7 +306,7 @@ curl -X GET http://localhost:3101/api/store-info
 
 #### Get Conversation History
 ```bash
-curl -X GET http://localhost:3101/api/sessions/pharma-session-001/history
+curl -X GET https://medical.lehana.in/ncert/api/sessions/pharma-session-001/history
 ```
 
 **Response:**
@@ -327,12 +331,12 @@ curl -X GET http://localhost:3101/api/sessions/pharma-session-001/history
 
 #### Clear Session
 ```bash
-curl -X DELETE http://localhost:3101/api/sessions/pharma-session-001
+curl -X DELETE https://medical.lehana.in/ncert/api/sessions/pharma-session-001
 ```
 
 #### Get Session Statistics
 ```bash
-curl -X GET http://localhost:3101/api/sessions/stats
+curl -X GET https://medical.lehana.in/ncert/api/sessions/stats
 ```
 
 **Response:**
@@ -345,13 +349,16 @@ curl -X GET http://localhost:3101/api/sessions/stats
 
 ### 8. Health Check
 ```bash
-curl -X GET http://localhost:3101/health
+curl -X GET https://medical.lehana.in/ncert/health
 ```
 
 **Response:**
 ```json
 {
-  "status": "ok"
+  "status": "ok",
+  "started": "Feb 16, 2026 at 07:37 PM IST",
+  "host": "medical.lehana.in",
+  "version": "1.0.0"
 }
 ```
 
@@ -400,40 +407,40 @@ npm run dev
 ### Step 2: Upload all sample PDFs
 ```bash
 # Upload CDSCO 1940 banned drugs list
-curl -X POST http://localhost:3101/api/index \
+curl -X POST https://medical.lehana.in/ncert/api/index \
   -F "file=@data/banned-drugs-cdsco-1940.pdf" \
   -F 'metadata={"source": "CDSCO", "type": "banned_drugs_list", "document": "Drugs and Cosmetics Act 1940"}'
 
 # Upload CDSCO 2018 consolidated list
-curl -X POST http://localhost:3101/api/index \
+curl -X POST https://medical.lehana.in/ncert/api/index \
   -F "file=@data/cdsco_banned_01Jan2018.pdf" \
   -F 'metadata={"source": "CDSCO", "type": "banned_drugs_consolidated", "year": "2018"}'
 
 # Upload Delhi state circular
-curl -X POST http://localhost:3101/api/index \
+curl -X POST https://medical.lehana.in/ncert/api/index \
   -F "file=@data/delhi.pdf" \
   -F 'metadata={"source": "Delhi State Drugs Department", "type": "state_circular"}'
 ```
 
 ### Step 3: Verify documents are indexed
 ```bash
-curl -X GET http://localhost:3101/api/documents
+curl -X GET https://medical.lehana.in/ncert/api/documents
 ```
 
 ### Step 4: Search for banned medicines
 ```bash
 # Check if a specific medicine is banned
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Is nimesulide banned in India?"}'
 
 # Check FDC bans
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Which fixed dose combinations containing paracetamol are banned?"}'
 
 # General query
-curl -X POST http://localhost:3101/api/search \
+curl -X POST https://medical.lehana.in/ncert/api/search \
   -H "Content-Type: application/json" \
   -d '{"query": "List all drugs banned under Section 26A of the Drugs and Cosmetics Act"}'
 ```
@@ -486,6 +493,7 @@ Every search response returns structured JSON following the Government of India 
 | `PORT` | Backend server port | `3101` |
 | `STORE_NAME` | Gemini file search store name | `banned-pharma-rag-store` |
 | `GEMINI_MODEL` | Gemini model to use | `gemini-2.5-flash` |
+| `SERVER_HOST` | Hostname for health check | `medical.lehana.in` |
 
 ---
 
@@ -494,13 +502,13 @@ Every search response returns structured JSON following the Government of India 
 ### Quick API Test
 ```bash
 # Health check
-curl http://localhost:3101/health
+curl https://medical.lehana.in/ncert/health
 
 # List documents
-curl http://localhost:3101/api/documents
+curl https://medical.lehana.in/ncert/api/documents
 
 # Store info
-curl http://localhost:3101/api/store-info
+curl https://medical.lehana.in/ncert/api/store-info
 ```
 
 ### Full Integration Test
