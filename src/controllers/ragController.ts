@@ -69,7 +69,33 @@ export const search = async (req: Request, res: Response) => {
         const finalSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
         const result = await geminiService.query(query, filter, finalSessionId);
-        res.json(result);
+
+        // Try to parse the model's text response as JSON (our prompt asks for JSON output)
+        let parsedResponse: any = null;
+        if (result.text) {
+            try {
+                // Strip markdown code fences if present (```json ... ```)
+                let cleanText = result.text.trim();
+                cleanText = cleanText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+
+                parsedResponse = JSON.parse(cleanText);
+            } catch (parseError) {
+                // Model didn't return valid JSON — fall back to raw text
+                console.warn('Could not parse model response as JSON, returning raw text');
+            }
+        }
+
+        if (parsedResponse) {
+            // Return the structured JSON response from the model
+            res.json({
+                ...parsedResponse,
+                groundingMetadata: result.groundingMetadata,
+                sessionId: result.sessionId
+            });
+        } else {
+            // Fallback: return raw text response (backward compatibility)
+            res.json(result);
+        }
     } catch (error: any) {
         console.error('Error searching:', error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
