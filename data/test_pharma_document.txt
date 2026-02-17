@@ -1,0 +1,32 @@
+PHARMACEUTICAL COMPLIANCE TEST DOCUMENT
+
+Drug Safety Alert - September 2025
+
+BANNED SUBSTANCES UPDATE:
+
+1. Codeine-based cough syrups
+   - Banned for pediatric use (under 18 years)
+   - Effective date: October 1, 2025
+   - Penalty: ₹50,000 fine for violations
+
+2. Phenylpropanolamine (PPH)
+   - Complete ban on manufacturing and sale
+   - Risk of hemorrhagic stroke
+   - All existing stock to be recalled
+
+3. Fixed Dose Combinations (FDCs)
+   - 156 FDCs banned by CDSCO
+   - No therapeutic justification
+   - Manufacturing licenses revoked
+
+COMPLIANCE REQUIREMENTS:
+- All pharmaceutical companies must update their product portfolios
+- Mandatory submission of compliance certificates by November 15, 2025
+- Regular inspections will be conducted
+
+For queries, contact:
+CDSCO Headquarters
+New Delhi
+Email: compliance@cdsco.gov.in
+
+This document is for testing RAG system upload functionality.

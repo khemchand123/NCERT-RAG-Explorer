@@ -1,0 +1,144 @@
+MINISTRY OF HEALTH AND FAMILY WELFARE
+GOVERNMENT OF INDIA
+GAZETTE OF INDIA NOTIFICATION
+
+EXTRAORDINARY
+PART II—Section 3—Sub-section (i)
+PUBLISHED BY AUTHORITY
+
+No. 123] NEW DELHI, FRIDAY, JANUARY 15, 2024 [MAGHA 25, 1945]
+
+MINISTRY OF HEALTH AND FAMILY WELFARE
+
+NOTIFICATION
+
+New Delhi, the 15th January, 2024
+
+G.S.R. 456(E).—Whereas certain drugs have been found to pose significant health risks to the public and require immediate regulatory action under the Drugs and Cosmetics Act, 1940 (23 of 1940);
+
+AND WHEREAS, based on the recommendations of the Drug Technical Advisory Board (DTAB) and in consultation with the Drugs Consultative Committee (DCC), the Central Government considers it necessary to prohibit the manufacture, sale, and distribution of certain pharmaceutical substances;
+
+NOW, THEREFORE, in exercise of the powers conferred by sections 26A and 33P of the Drugs and Cosmetics Act, 1940 (23 of 1940), the Central Government hereby makes the following rules to amend the Drugs and Cosmetics Rules, 1945, namely:—
+
+PROHIBITED DRUGS - SCHEDULE X AMENDMENTS
+
+1. SHORT TITLE AND COMMENCEMENT
+   This notification may be called the Drugs and Cosmetics (Sixth Amendment) Rules, 2024.
+   These rules shall come into force on the date of their publication in the Official Gazette.
+
+2. DRUGS BANNED FOR MANUFACTURE, SALE AND DISTRIBUTION
+
+The following pharmaceutical substances are hereby added to Schedule X (Prohibited Drugs):
+
+a) TRAMADOL HYDROCHLORIDE (All formulations)
+   - Effective Date: February 1, 2024
+   - Reason: High potential for abuse and addiction
+   - Previous Classification: Schedule H
+
+b) CODEINE PHOSPHATE COMBINATIONS
+   - All cough syrups containing codeine phosphate
+   - Fixed dose combinations with codeine exceeding 10mg per dose
+   - Effective Date: March 1, 2024
+   - Reason: Widespread misuse and respiratory depression risks
+
+c) DEXTROMETHORPHAN HYDROBROMIDE
+   - Concentrations exceeding 15mg per 5ml in liquid formulations
+   - Effective Date: February 15, 2024
+   - Reason: Recreational abuse and psychoactive effects
+
+3. CONTROLLED SUBSTANCES - SCHEDULE H1 ADDITIONS
+
+The following drugs are transferred to Schedule H1 (Prescription Drug) with enhanced monitoring:
+
+a) PREGABALIN
+   - All formulations and strengths
+   - Mandatory prescription recording
+   - Patient identification required
+
+b) ALPRAZOLAM EXTENDED RELEASE
+   - Strengths above 0.5mg
+   - Enhanced tracking requirements
+   - Quarterly reporting to drug controller
+
+4. MANUFACTURING LICENSES AFFECTED
+
+All existing manufacturing licenses for the above-mentioned prohibited drugs shall stand suspended with immediate effect. Manufacturers are required to:
+
+- Stop production within 30 days of this notification
+- Recall existing stock from the market
+- Submit inventory reports to respective State Drug Controllers
+- Dispose of remaining stock under authorized supervision
+
+5. REGULATORY COMPLIANCE REQUIREMENTS
+
+Healthcare practitioners and pharmacists must:
+- Update prescription practices immediately
+- Remove prohibited drugs from inventory
+- Report any adverse events related to these substances
+- Maintain detailed records for Schedule H1 substances
+
+6. PENALTIES FOR NON-COMPLIANCE
+
+Any person found manufacturing, selling, or distributing the prohibited drugs after the effective dates shall be liable for prosecution under sections 27, 27A, and 27C of the Drugs and Cosmetics Act, 1940, with penalties including:
+- Imprisonment up to 10 years
+- Fine up to Rs. 10 lakhs
+- Cancellation of licenses
+
+7. TRANSITION PERIOD
+
+A grace period of 60 days is provided for:
+- Existing stock clearance under supervision
+- Patient transition to alternative therapies
+- Healthcare provider education and training
+
+8. REPORTING REQUIREMENTS
+
+All stakeholders must report compliance status to their respective State Drug Control Authorities within 45 days of this notification.
+
+SPECIAL PROVISIONS FOR CHRONIC PATIENTS
+
+Patients currently prescribed the prohibited medications may continue under strict medical supervision with:
+- Weekly medical review for first month
+- Alternative therapy identification
+- Gradual dose reduction protocols
+- Specialized de-addiction support if required
+
+ALTERNATIVE THERAPIES APPROVED
+
+The following alternatives are recommended for the prohibited substances:
+- For pain management: Paracetamol, Ibuprofen, Diclofenac (under medical supervision)
+- For cough: Guaifenesin-based preparations, Bromhexine
+- For anxiety: Lorazepam (short-term), non-pharmacological interventions
+
+MONITORING AND SURVEILLANCE
+
+Enhanced pharmacovigilance measures include:
+- Mandatory adverse drug reaction reporting
+- Market surveillance for illegal sales
+- Online pharmacy monitoring
+- Patient registry maintenance for controlled substances
+
+This notification supersedes all previous notifications regarding these substances and shall be binding on all concerned parties.
+
+By Order of the Central Government,
+
+DR. RAJESH KUMAR
+Joint Secretary to the Government of India
+Ministry of Health and Family Welfare
+
+ANNEXURE - CONTACT INFORMATION
+
+For queries and clarifications:
+Drug Controller General of India
+FDA Bhawan, Kotla Road
+New Delhi - 110002
+Email: dcgi@gov.in
+Phone: +91-11-23236975
+
+State Drug Control Authorities should ensure wide dissemination of this notification to all stakeholders including manufacturers, distributors, healthcare providers, and pharmacists.
+
+This notification is also available on the Ministry's website: www.mohfw.gov.in
+
+---
+Published by the Manager, Government of India Press, Ring Road, Mayapuri, New Delhi-110064
+Printed by the Controller of Publications, Delhi-110054
