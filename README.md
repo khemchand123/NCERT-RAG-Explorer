@@ -164,10 +164,46 @@ curl -X POST https://medical.lehana.in/ncert/api/search \
   }'
 ```
 
-**Expected Response (from AI):**
+**Expected Response (Structured JSON):**
 ```json
 {
-  "text": "{\"query\":\"Is paracetamol banned in India?\",\"medicine_searched\":\"Paracetamol\",\"total_results\":1,\"current_status\":\"open\",\"results\":[{\"gazette_id\":\"N/A\",\"pdf_name\":\"banned-drugs-cdsco-1940.pdf\",\"medicine_name\":\"Paracetamol\",\"date_of_ban\":\"N/A\",\"date_of_uplift\":\"N/A\",\"details\":\"Paracetamol itself is NOT banned in India. However, certain Fixed Dose Combinations (FDCs) containing paracetamol have been banned.\",\"reasons_for_ban\":\"N/A\",\"reasons_for_uplift\":\"N/A\",\"drug_category\":\"single_drug\",\"population_restriction\":\"none\",\"schedule_classification\":\"Schedule H\",\"controlled_status\":\"Not controlled\",\"source_authority\":\"CDSCO\",\"act_reference\":\"Drugs and Cosmetics Act 1940\",\"alternative_medicines\":\"Not specified in documents\",\"compliance_note\":\"N/A\"}],\"summary\":\"Paracetamol is not banned in India. It is a widely available over-the-counter and prescription analgesic.\",\"disclaimer\":\"This information is based on regulatory documents available in the system. For the latest regulatory status, always verify with the official CDSCO website (cdsco.gov.in) or the e-Gazette portal (egazette.gov.in). This is not medical or legal advice.\"}",
+  "query": "Is paracetamol banned in India?",
+  "medicine_searched": "paracetamol",
+  "total_results": 1,
+  "current_status": "open",
+  "results": {
+    "gazette_id": "N/A",
+    "pdf_name": "cdsco_banned_01Jan2018.pdf",
+    "medicine_name": "paracetamol",
+    "date_of_ban": "N/A",
+    "date_of_uplift": "N/A",
+    "summary": "Paracetamol is NOT banned in India. It is a Schedule H drug under the Drugs and Cosmetics Act, 1940. However, certain FDCs containing Paracetamol are banned by CDSCO.",
+    "reasons_for_ban": "N/A",
+    "reasons_for_uplift": "N/A",
+    "drug_category": "single_drug",
+    "population_restriction": "none",
+    "schedule_classification": "Schedule H",
+    "controlled_status": "Not controlled",
+    "source_authority": "CDSCO",
+    "act_reference": "Drugs and Cosmetics Act 1940",
+    "alternative_medicines": "Not specified in documents",
+    "compliance_note": "N/A",
+    "name_image_match": "N/A",
+    "source_banned": "blank",
+    "source_internet": "blank",
+    "source_approved": "never banned",
+    "source_approved_internet": "blank",
+    "approved_gazette": "blank",
+    "source_scheduled": "file",
+    "source_scheduled_file": "cdsco_scheduled_01July2024.pdf",
+    "source_scheduled_internet": "blank",
+    "source_controlled": "blank",
+    "keyword": "paracetamol",
+    "misc": "Warning: FDCs containing Paracetamol + Phenylephrine + Caffeine are banned.",
+    "reasoning": "Paracetamol is not banned as a single drug. Found in Schedule H. Certain FDCs containing it are prohibited.",
+    "itemid": "N/A"
+  },
+  "text": "Paracetamol is NOT banned in India. It is a Schedule H drug under the Drugs and Cosmetics Act, 1940.",
   "groundingMetadata": {},
   "sessionId": "pharma-session-001"
 }
