@@ -87,8 +87,10 @@ export const search = async (req: Request, res: Response) => {
 
         if (parsedResponse) {
             // Return the structured JSON response from the model
+            // Also ensure 'text' property exists for backward compatibility with frontend
             res.json({
                 ...parsedResponse,
+                text: parsedResponse.summary || JSON.stringify(parsedResponse, null, 2), // Fallback if summary missing
                 groundingMetadata: result.groundingMetadata,
                 sessionId: result.sessionId
             });
