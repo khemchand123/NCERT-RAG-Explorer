@@ -449,36 +449,60 @@ curl -X POST https://medical.lehana.in/ncert/api/search \
 
 ## 📊 Expected Search Output Format
 
-Every search response returns structured JSON following the Government of India Pharmaceutical Regulatory Compliance format:
+Every search response returns structured JSON following the **22-key Government of India Pharmaceutical Regulatory Compliance format**.
+
+### Field Descriptions & Possible Values:
+
+| Key | Possible Values | Description |
+|-----|-----------------|-------------|
+| `name` | String | Name of the drug searched. |
+| `name_image_match` | `Yes` \| `No` | Whether the image matches the drug name (if image provided). |
+| `status` | `banned` \| `controlled` \| `scheduled` \| `open` \| `unknown` | **Current regulatory status** of the drug. `open` if found but not restricted. `unknown` if drug is not found in any source. |
+| `source_banned` | `file` \| `news` \| `gazette` \| `internet` \| `blank` | Source where the ban was found. `blank` if not banned. |
+| `source_file` | Filename \| `blank` | Exact PDF filename (e.g., `cdsco_banned_01Jan2018.pdf`) if found in uploaded documents. |
+| `source_internet` | String \| `blank` | Description/Link if found on the internet. |
+| `banned_in` | Date (Jan 1, 2025) \| `blank` | Date when the ban was imposed. |
+| `gazette` | String (GSR 91 E) \| `blank` | Official Gazette Notification Reference number. |
+| `source_approved` | `news` \| `gazette` \| `internet` \| `never banned` | Source of approval if a ban was lifted. |
+| `approved_in` | Date \| `blank` | Date when the ban was lifted (must be > banned date). |
+| `approved_gazette` | String \| `blank` | Gazette Notification for the approval. |
+| `source_scheduled` | `file` \| `news` \| `gazette` \| `internet` \| `blank` | Source where the schedule classification was found. |
+| `schedule` | `h` \| `h1` \| `x` \| `blank` | Schedule classification (H=Rx, H1=Restricted, X=Narcotic/Psychotropic). |
+| `source_controlled` | `file` \| `news` \| `gazette` \| `internet` \| `blank` | Source for controlled substance classification (NDPS Act). |
+| `keyword` | String | Main keyword used for classification. |
+| `misc` | String | Any other details (NSQ alerts, FDC warnings, import bans). |
+| `reasoning` | String | Explanation for the determined status. |
+| `itemid` | String | Unique item ID from the source file. |
+| `summary` | String | 1-2 line concise summary. |
+| `text` | String | Backward-compatible field containing the summary. |
+
+### Example Response:
 
 ```json
 {
-  "query": "user's original query",
-  "medicine_searched": "corrected/standardized medicine name",
-  "total_results": 1,
-  "current_status": "banned | approved | scheduled | controlled | open | unknown",
-  "results": [
-    {
-      "gazette_id": "GSR 91(E) — or N/A if not found",
-      "pdf_name": "source PDF filename",
-      "medicine_name": "Full medicine name as in document",
-      "date_of_ban": "DD MMM YYYY — or N/A",
-      "date_of_uplift": "DD MMM YYYY — or N/A",
-      "details": "Comprehensive paragraph from documents",
-      "reasons_for_ban": "Specific reasons from documents",
-      "reasons_for_uplift": "N/A if not lifted",
-      "drug_category": "single_drug | fdc | import_banned",
-      "population_restriction": "all | children | women | none",
-      "schedule_classification": "Schedule H | H1 | X | Not Scheduled",
-      "controlled_status": "NDPS controlled | Not controlled",
-      "source_authority": "CDSCO, Ministry of Health, etc.",
-      "act_reference": "Drugs and Cosmetics Act 1940 Section 26A",
-      "alternative_medicines": "From documents or 'Not specified'",
-      "compliance_note": "Penalties, transition periods, etc."
-    }
-  ],
-  "summary": "2-3 line human-readable summary",
-  "disclaimer": "Verification advisory with official website links"
+  "name": "Paracetamol",
+  "name_image_match": "Yes",
+  "status": "open",
+  "source_banned": "file",
+  "source_file": "cdsco_banned_01Jan2018.pdf",
+  "source_internet": "blank",
+  "banned_in": "blank",
+  "gazette": "blank",
+  "source_approved": "never banned",
+  "source_approved_internet": "blank",
+  "approved_in": "blank",
+  "approved_gazette": "blank",
+  "source_scheduled": "file",
+  "schedule": "h",
+  "source_scheduled_file": "cdsco_scheduled_01July2024.pdf",
+  "source_scheduled_internet": "blank",
+  "source_controlled": "blank",
+  "keyword": "paracetamol",
+  "misc": "Warning: FDCs containing Paracetamol + Phenylephrine + Caffeine are banned vide S.O. 713(E)",
+  "reasoning": "Paracetamol is not banned as a single drug but listed in Schedule H. However, certain FDCs are prohibited.",
+  "itemid": "12345",
+  "summary": "Paracetamol is NOT banned in India but is a Schedule H drug. Some FDCs containing it are prohibited.",
+  "text": "Paracetamol is NOT banned in India but is a Schedule H drug. Some FDCs containing it are prohibited."
 }
 ```
 
