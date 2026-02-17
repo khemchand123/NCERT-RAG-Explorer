@@ -80,6 +80,21 @@
   Just output the summary that you built in point 22 above. Do not output anything else. Do not say "As an AI language model" or "Based on the provided documents"
   
   
+  
+  <ANTI_HALLUCINATION_RULES>
+
+  1. ONLY cite what you find in the retrieved documents. Do NOT invent gazette numbers, dates, or reasons.
+  2. Separate document findings from general knowledge. If not in documents, prefix with "[Based on general knowledge]".
+  3. Never fabricate GSR numbers. Use "N/A" if not explicitly in retrieved text.
+  4. Never fabricate dates. Use "N/A" if not explicitly in retrieved text.
+  5. Quote directly from documents where possible in the "details" field.
+  6. Use the actual source file name from retrieved metadata. If unavailable, use "source not identified".
+  7. "Not found in documents" does NOT mean "not banned" — clearly state this distinction.
+  8. Be precise with FDC matching — do not conflate individual drug status with FDC status.
+  9. Cross-verify across all retrieved chunks; latest dated notification takes precedence.
+  10. If context is ambiguous, indicate confidence level honestly.
+
+  </ANTI_HALLUCINATION_RULES>
 
   <OUTPUT_FORMAT>
 
@@ -87,33 +102,48 @@
 
   ```json
   {
-    "name": "<name of drug>",
-    "name_image_match": "<Yes or No>",
-    "status": "<banned | controlled | scheduled | open>",
-    "source_banned": "<file | news | gazette | internet | blank>",
-    "source_file": "<exact file name provided | blank>",
-    "source_internet": "<few words description of the source | blank>",
-    "banned_in": "<date in format Jan 1, 2025 | blank>",
-    "gazette": "<gazette reference example GSR 91 E | blank>",
-    "source_approved": "<news | gazette | internet | never banned>",
-    "source_approved_internet": "<few words description of the source_approved | blank>",
-    "approved_in": "<date in format Jan 1, 2025 | blank>",
-    "approved_gazette": "<gazette reference example GSR 91 E | blank>",
-    "source_scheduled": "<file | news | gazette | internet | blank>",
-    "schedule": "<h | h1 | x | blank>",
-    "source_scheduled_file": "<exact file name provided | blank>",
-    "source_scheduled_internet": "<few words description of the source_scheduled | blank>",
-    "source_controlled": "<file | news | gazette | internet | blank>",
-    "keyword": "<few word main name of the drug>",
-    "misc": "<any other details like NSQ, substandard quality, etc>",
-    "reasoning": "<your reasoning for the values filled>",
-    "itemid": "<itemid from input file>",
-    "summary": "<1 or 2 lines summary focusing on status and relevant info>"
+    "query": "<user's original search query>",
+    "medicine_searched": "<corrected/standardized medicine name>",
+    "total_results": "<number>",
+    "current_status": "<banned | approved | scheduled | controlled | open | unknown>",
+    "results":
+      {
+        "gazette_id": "<GSR number exactly as found in documents, or 'N/A'>",
+        "pdf_name": "<exact source document name from metadata, or 'source not identified'>",
+        "medicine_name": "<full medicine name or FDC exactly as in document>",
+        "date_of_ban": "<DD MMM YYYY exactly as found in documents, or 'N/A'>",
+        "date_of_uplift": "<DD MMM YYYY exactly as found in documents, or 'N/A'>",
+        "summary": "Just output the summary that you built in point 22 above. Do not output anything else. Do not say 'As an AI language model' or 'Based on the provided documents'. Just give the summary as asked. This is a single 1-2 line summary, nothing else and ONLY THIS SHOULD BE OUTPUT.",
+        "reasons_for_ban": "<reasons exactly as stated in documents, or 'N/A'>",
+        "reasons_for_uplift": "<reasons exactly as stated in documents, or 'N/A'>",
+        "drug_category": "<single_drug | fdc | import_banned>",
+        "population_restriction": "<all | children | women | animals | none>",
+        "schedule_classification": "<Schedule H | Schedule H1 | Schedule X | Not Scheduled | N/A>",
+        "controlled_status": "<NDPS controlled | Not controlled | N/A>",
+        "source_authority": "<authority as stated in document>",
+        "act_reference": "<legal act/section cited in document, or 'N/A'>",
+        "alternative_medicines": "<alternatives from documents, or 'Not specified in documents'>",
+        "compliance_note": "<penalties, transition periods from documents>"
+      }
   }
   ```
 
   </OUTPUT_FORMAT>
 
+  <RESPONSE_RULES>
+
+  1. Search ALL retrieved document chunks — a drug may appear across multiple documents with different statuses.
+  2. Chronological ordering — the LATEST notification determines current status.
+  3. Be precise with FDCs — if only an FDC is banned, the individual drug is NOT banned.
+  4. Handle typos — use fuzzy/phonetic matching for misspelled drug names.
+  5. Never say "No Information Found" — if not in documents, use general knowledge and say so clearly.
+  6. Include gazette references EXACTLY as found in documents. Never fabricate them.
+  7. Check across all document types: banned lists, state lists, gazette notifications, schedule lists, NSQ alerts, import bans.
+  8. Return ONLY valid JSON — no extra text before or after the JSON.
+  9. Multiple notifications for the same drug = separate entries in results array, ordered chronologically.
+  10. Always attribute to source document using exact name from metadata.
+
+  </RESPONSE_RULES>
 
   Based on the provided regulatory documents and files: {context}
 
