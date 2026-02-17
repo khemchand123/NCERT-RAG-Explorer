@@ -249,28 +249,43 @@ export class GeminiService {
             let documentList: any[] = [];
 
             try {
-                // Use the official documents.list API
-                const documents = await this.client.fileSearchStores.documents.list({
+                // Use the official documents.list API with pageSize for proper pagination
+                const pager = await this.client.fileSearchStores.documents.list({
                     parent: store.name,
+                    config: { pageSize: 20 }
                 });
 
-                console.log('Using documents.list method');
+                console.log('Using documents.list method with pageSize: 20');
 
-                for await (const doc of documents) {
-                    documentList.push({
-                        name: doc.name,
-                        displayName: doc.displayName || 'Unknown',
-                        mimeType: doc.mimeType || 'application/octet-stream',
-                        sizeBytes: doc.sizeBytes || 0,
-                        createTime: doc.createTime || new Date().toISOString(),
-                        updateTime: doc.updateTime || new Date().toISOString(),
-                        metadata: doc.customMetadata || [],
-                        state: doc.state || 'ACTIVE'
-                    });
+                // Iterate through all pages
+                let page = pager.page;
+                let hasNextPage = true;
+
+                while (hasNextPage) {
+                    if (page) {
+                        for (const doc of page) {
+                            documentList.push({
+                                name: doc.name,
+                                displayName: doc.displayName || 'Unknown',
+                                mimeType: doc.mimeType || 'application/octet-stream',
+                                sizeBytes: doc.sizeBytes || 0,
+                                createTime: doc.createTime || new Date().toISOString(),
+                                updateTime: doc.updateTime || new Date().toISOString(),
+                                metadata: doc.customMetadata || [],
+                                state: doc.state || 'ACTIVE'
+                            });
+                        }
+                    }
+
+                    if (pager.hasNextPage()) {
+                        page = await pager.nextPage();
+                    } else {
+                        hasNextPage = false;
+                    }
                 }
             } catch (apiError: any) {
                 console.error('documents.list API failed:', apiError?.message || apiError);
-                throw new Error('Unable to access Gemini document list API');
+                // Don't throw — fall through to local storage fallback below
             }
 
             // Sync local store with Gemini store
@@ -289,6 +304,15 @@ export class GeminiService {
             }
 
             console.log(`Found ${documentList.length} documents in Gemini store`);
+
+            // If Gemini API returned 0 but local storage has documents, use local storage
+            // This handles Gemini API inconsistency where documents.list returns empty
+            // even though documents exist and are searchable
+            if (documentList.length === 0 && documentsStore.length > 0) {
+                console.log(`Gemini returned 0 docs but local storage has ${documentsStore.length} — using local storage`);
+                return [...documentsStore].reverse(); // Most recent first
+            }
+
             return documentList.reverse(); // Most recent first
 
         } catch (error) {
